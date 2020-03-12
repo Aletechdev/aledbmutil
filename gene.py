@@ -1,3 +1,18 @@
+RNAP_GENE_NAMES = [
+    "fecI",
+    "fliA",
+    "rpoH",
+    "rpoA",
+    "rpoB",
+    "rpoC",
+    "rpoN",
+    "rpoD",
+    "rpoE",
+    "rpoS",
+    "rpoF",
+    "rpoZ"]
+
+
 def get_coding_genetic_target_len_d(component_name_str, genes_df):
     genetic_target_len_d = dict()
 

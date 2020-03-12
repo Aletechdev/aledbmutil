@@ -106,21 +106,11 @@ def get_ins_size(seq_change_str):
         before_seq_freq = int(''.join([i for i in s if i.isdigit()]))
         s = seq_change_str[seq_change_str.find('→')+1:]
         after_seq_freq = int(''.join([i for i in s if i.isdigit()]))
-        if "bp" in seq_change_str:
-            s = seq_change_str[seq_change_str.find('(')+1:seq_change_str.find(')')]
-            s = s.replace(" bp", "")
-            ins_size = int(s)
-        else:
-            seq_str = seq_change_str[seq_change_str.find('(')+1:seq_change_str.find(')')]
-            ins_size = after_seq_freq * len(seq_str) - before_seq_freq * len(seq_str)
+        seq_str = seq_change_str[seq_change_str.find('(')+1:seq_change_str.find(')')]
+        ins_size = after_seq_freq * len(seq_str) - before_seq_freq * len(seq_str)
     if '+' in seq_change_str:
         ins_size = len(seq_change_str[seq_change_str.find('+')+1:])
     return ins_size
-
-
-assert(get_ins_size("(TTC)1→2") == 3)
-assert(get_ins_size("+GCTA") == 4)
-assert(get_ins_size("(45 bp)1→2") == 45)
 
 
 def get_amp_size(seq_change_str):
@@ -180,6 +170,17 @@ def is_non_syn_SNP(amino_acid_change_str):
 
 def get_SNP_aa_pos(amino_acid_change_str):
     return int(re.sub("[^0-9]", "", amino_acid_change_str))
+
+
+def get_DEL_INS_MOB_aa_pos(mut_details_str):
+    aa_pos = None
+    start_char = '('
+    end_char = '/'
+    if '‑' in mut_details_str:
+        end_char = '‑'
+    nuc_pos = int(mut_details_str[mut_details_str.find(start_char) + 1 :mut_details_str.find(end_char)])
+    aa_pos = int(nuc_pos/3)
+    return aa_pos
 
 
 def get_codon_change_list(coding_SNP_details):

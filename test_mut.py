@@ -22,7 +22,6 @@ assert(get_del_size("(T)60→50") == 10)
 
 assert(get_ins_size("(TTC)1→2") == 3)
 assert(get_ins_size("+GCTA") == 4)
-assert(get_ins_size("(45 bp)1→2") == 45)
 
 assert(get_amp_size('36,044 bp x 3') == 72088)
 
@@ -50,7 +49,7 @@ assert(is_start_codon_removal('P1100Q\xa0(→TAG)\xa0')==False)
 assert(is_start_codon_removal('M1M (ATG→ATA) †'))
 
 # dictionaries can be substituted for Pandas series (DataFrame rows).
-assert(is_disruptive({"coding": True, "genetic":True, "Mutation Type": "DEL", "gene count": 1, "mutation size": 1}, STRUCTURAL_LEVEL)==True)
-assert(is_disruptive({"coding": True, "genetic":True, "Mutation Type": "AMP", "gene count": 1, "mutation size": 92}, STRUCTURAL_LEVEL)==True)
+assert(is_disruptive({"coding": True, "genetic":True, "Mutation Type": "DEL", "target count": 1, "mutation size": 1}, STRUCTURAL_LEVEL)==True)
+assert(is_disruptive({"coding": True, "genetic":True, "Mutation Type": "AMP", "target count": 1, "mutation size": 92}, STRUCTURAL_LEVEL)==True)
 
 print("DONE")
