@@ -39,8 +39,8 @@ def get_mut_dataframe(CSV_file_path,
     
     # Step 1: Import database
     raw_db = pd.read_csv(CSV_file_path)
-    if 'Function' in raw_db.columns:
-        raw_db = raw_db.drop('Function', axis=1)
+#    if 'Function' in raw_db.columns:  workaround for bug ASW-1457
+#        raw_db = raw_db.drop('Function', axis=1)  workaround for bug ASW-1457
     if 'Product' in raw_db.columns:
         raw_db = raw_db.drop('Product', axis=1)
     if 'GO Process' in raw_db.columns:
@@ -50,7 +50,7 @@ def get_mut_dataframe(CSV_file_path,
     
     # TODO: The below will crash if most than these columns. Needs to ignore other mutation columns.
     # Step 2: Separate columns based on usage
-    keep_cols = ['Position','Mutation Type','Sequence Change','Details','Gene']
+    keep_cols = ['Position','Mutation Type','Sequence Change','Details','Gene', "Function"]  # "function" is a workaround for bug ASW-1457
     if  "Reference Seq" in raw_db.columns:  # For backwards compatibility with older exported mutation data
         keep_cols.append("Reference Seq")
     if "Mut ID" in raw_db.columns:  # For backwards compatibility with older exported mutation data
