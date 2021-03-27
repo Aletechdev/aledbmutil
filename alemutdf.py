@@ -8,7 +8,7 @@ import os, sys
 module_path = os.path.abspath(os.path.join('..'))
 if module_path not in sys.path:
     sys.path.append(module_path)
-from util.mut import get_del_size, get_ins_size, get_inv_size, get_con_size, get_sub_size, get_amp_size, is_frameshift, is_coding_mut, is_premature_stop_codon_SNP, is_readthrough_codon_SNP, is_start_codon_removal
+from mutil.mut import get_del_size, get_ins_size, get_inv_size, get_con_size, get_sub_size, get_amp_size, is_frameshift, is_coding_mut, is_premature_stop_codon_SNP, is_readthrough_codon_SNP, is_start_codon_removal
 
 
 # TODO: Integrate functionality to get the series of fixed mutations defined by a final mutation with a frequency larger than a given threshold into this list of scripts. This functionality is implemented in substitution_rate_decline.ipynb.
