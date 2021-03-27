@@ -24,6 +24,9 @@ def get_MOB_type_str(MOB_seq_change_str):
     return MOB_type_str
 
 
+# If the DEL or INS is a multiple of 3, no matter what the position of the mutation within a frame,
+# those frames downstream of the mutation will remaining in sync with the gene's coding frame.
+# TODO: check if the remenants of combined frames result in a stop codon.
 def is_frameshift(nuc_shift_size):
     return nuc_shift_size % 3 != 0
 
@@ -102,12 +105,14 @@ def get_del_size(seq_change_str):
 def get_ins_size(seq_change_str):
     ins_size = 0
     if '→' in seq_change_str:
-        s = seq_change_str[:seq_change_str.find('→')]
-        before_seq_freq = int(''.join([i for i in s if i.isdigit()]))
-        s = seq_change_str[seq_change_str.find('→')+1:]
-        after_seq_freq = int(''.join([i for i in s if i.isdigit()]))
-        seq_str = seq_change_str[seq_change_str.find('(')+1:seq_change_str.find(')')]
-        ins_size = after_seq_freq * len(seq_str) - before_seq_freq * len(seq_str)
+        before_seq_freq = int(seq_change_str[seq_change_str.find(')')+1:seq_change_str.find('→')])
+        after_seq_freq = int(seq_change_str[seq_change_str.find('→')+1:])  # Don't expect anything after the 
+        if "bp" in seq_change_str:
+            seq_size = int(seq_change_str[seq_change_str.find('(')+1:seq_change_str.find(' bp')])
+        else:
+            seq_str = seq_change_str[seq_change_str.find('(')+1:seq_change_str.find(')')]
+            seq_size = len(seq_str)
+        ins_size = after_seq_freq * seq_size - before_seq_freq * seq_size
     if '+' in seq_change_str:
         ins_size = len(seq_change_str[seq_change_str.find('+')+1:])
     return ins_size
@@ -171,16 +176,40 @@ def is_non_syn_SNP(amino_acid_change_str):
 def get_SNP_aa_pos(amino_acid_change_str):
     return int(re.sub("[^0-9]", "", amino_acid_change_str))
 
-
-def get_DEL_INS_MOB_aa_pos(mut_details_str):
+import math
+def get_DEL_INS_MOB_aa_start_pos(mut_details_str):
     aa_pos = None
-    start_char = '('
-    end_char = '/'
-    if '‑' in mut_details_str:
-        end_char = '‑'
-    nuc_pos = int(mut_details_str[mut_details_str.find(start_char) + 1 :mut_details_str.find(end_char)])
-    aa_pos = int(nuc_pos/3)
+    if len(mut_details_str):
+        start_char = '('
+        end_char = '/'
+        if '‑' in mut_details_str:  # '‑' is the character that Breseq specificially uses for dashes rather than '-'
+            end_char = '‑'  # '‑' is the character that Breseq specificially uses for dashes rather than '-'
+        nuc_pos = int(mut_details_str[mut_details_str.find(start_char) + 1 :mut_details_str.find(end_char)])
+        aa_pos = math.ceil(nuc_pos/3)
     return aa_pos
+
+
+def get_DEL_AA_range(mut_details_str):
+    DEL_AA_range = ()
+    if len(mut_details_str):
+        start_char = '(' 
+        end_char = '/' 
+        start_stop_str = mut_details_str[mut_details_str.find(start_char) + 1 : mut_details_str.find(end_char)]
+        l = start_stop_str.split('‑')  # '‑' is the character that Breseq specificially uses for dashes rather than '-'
+        ints = [int(x) for x in l]
+        if len(l) > 1:
+            start_aa_pos = math.ceil(ints[0]/3)
+            stop_aa_pos = math.ceil(ints[1]/3)
+            DEL_AA_range = (start_aa_pos, stop_aa_pos)
+        else:
+            aa_pos_set = math.ceil(ints[0]/3)
+            DEL_AA_range = (aa_pos_set, aa_pos_set)
+    return DEL_AA_range
+
+
+def get_DEL_AA_set(mut_details_str):
+    rng = get_DEL_AA_range(mut_details_str)
+    return set(range(rng[0], rng[1] + 1))  # Have to add 1 since also want to consider final position in the range
 
 
 def get_codon_change_list(coding_SNP_details):
@@ -248,29 +277,37 @@ def is_regulatory(df_row):
     return is_regulatory
 
 
+STRINGS_TO_REMOVE = [" > ", "]", "[", "</i>", "<i>", "<b>", "</b>", "<BR>"]
 def get_clean_mut_gene_list(gene_list_str):
-    gene_list_str = gene_list_str.replace(" > ", " ")
-    gene_list_str = gene_list_str.replace("]", "")
-    gene_list_str = gene_list_str.replace("[", "")
+    for s in STRINGS_TO_REMOVE:
+        if s in gene_list_str:
+            gene_list_str = gene_list_str.replace(s, "")
     if "genes" in gene_list_str:
         start_idx = gene_list_str.rfind("genes")+len("genes")
         gene_list_str = gene_list_str[start_idx:]
-    mut_gene_list = gene_list_str.split(", ")
+        
+    split_str = ", "
+    if split_str not in gene_list_str:
+        split_str = ","
+    
+    mut_gene_list = gene_list_str.split(split_str)
     clean_mut_gene_list = [gene for gene in mut_gene_list]
     return clean_mut_gene_list
 
 
 def get_gene_count(mut_df_row):
-    target_count = 0
-    gene_list_str = mut_df_row["mutation target annotation"]
+    target_count = 0 
+    breseq_gene_annot_row = "Gene"
+    if "mutation target annotation" in mut_df_row.keys():  # "mutation target annotation" used in AVA
+        breseq_gene_annot_row = "mutation target annotation"
+    gene_list_str = mut_df_row[breseq_gene_annot_row]
     mut_details_str = mut_df_row["Details"]
     if "intergenic" in mut_details_str:
-        target_count = 1
+        target_count = 1 
     else:
         gene_set = set(get_clean_mut_gene_list(gene_list_str))
         target_count = len(gene_set)
     return target_count
-
 
 
 STRUCTURAL_LEVEL = 0
@@ -281,39 +318,71 @@ OPERATIONAL_LEVEL = 1
 def is_disruptive_SNP(mut_df_row):
     is_disruptive_SNP = False
     if mut_df_row["Mutation Type"].lower() == "snp" and mut_df_row["coding"]:
-        if is_premature_stop_codon_SNP(mut_df_row.Details) or is_readthrough_codon_SNP(mut_df_row.Details) or is_start_codon_removal(mut_df_row.Details):
+        if is_premature_stop_codon_SNP(mut_df_row["Details"]) or is_readthrough_codon_SNP(mut_df_row["Details"]) or is_start_codon_removal(mut_df_row["Details"]):
             is_disruptive_SNP = True
     return is_disruptive_SNP
 
 
 # TODO: Not currently checking if pseudogenes are being further disrupted. Pseudogenes can still be translates; need to check if they get further disrupted.
-NON_CODING_COMP_COL_L = ['oriC', 'pseudogene', 'TFBS', 'promoter', 'TSS', 'RBS', 'cis-regulatory RNA', 'attenuator terminator', 'attenuator', 'terminator']
-def is_disruptive(mut_df_row, metastruct_level):
-    is_disruptive = False
-    if metastruct_level == STRUCTURAL_LEVEL:
-        if mut_df_row["genetic"]:
-            if mut_df_row["Mutation Type"].lower() == "mob":
-                is_disruptive = True
-            # Assuming any type of mutation that affects multiple targets will remove a start or stop codon.
-            elif mut_df_row["gene count"] > 1:
-                is_disruptive = True
-            elif mut_df_row["coding"]:
-                if mut_df_row["Mutation Type"].lower() == "snp":
-                    is_disruptive = is_disruptive_SNP(mut_df_row)
-                elif any(x == mut_df_row["Mutation Type"].lower() for x in ["ins", "del", "amp"]):
-                    is_disruptive = is_frameshift(mut_df_row["mutation size"])
-        else:
-            non_coding_comp_hit_l = mut_df_row[NON_CODING_COMP_COL_L].apply(lambda x: bool(x))
-            if mut_df_row["Mutation Type"].lower() == "mob" and any(t for t in non_coding_comp_hit_l):
-                is_disruptive = True
-    else:
-        print("!!! NEED TO IMPLEMENT !!!")
+def predict_mutation_effect_on_feature(mutation, feature):
+    pred_eff = "other"
     
-    return is_disruptive
+    if feature["feature type"] != "unknown":
+        
+        # Code block is for SVs
+        if mutation["Mutation Type"].lower() in ["ins", "del", "mob"]:
+            if feature["feature type"] == "gene":
+                if is_frameshift(mutation["mutation size"]):
+                    pred_eff = "truncation"
+            elif mutation["mutation size"] >= 10:  # any feature (besides "unknown") if INS, DEL, or MOB > 10
+                pred_eff = "truncation"
+
+        # Code block is just for SNPs to genes
+        if ((mutation["Mutation Type"].lower() == "snp") and (feature["feature type"] == "gene")):
+            if is_disruptive_SNP(mutation):
+                pred_eff = "truncation"
+            else:
+                aa_chng_str = mutation["Details"].split()[0]
+                if is_non_syn_SNP(aa_chng_str):
+                    pred_eff = "nonsynonymous"
+                else:
+                    pred_eff = "synonymous"
+    
+    return pred_eff
 
 
-# This is here and not in mut.py since it requires
-# the parsing of multiple columns with a mutation row.
+def get_mob_size(seq_change_str, mob_sizes):
+    
+    mob_mut_size = 0
+    
+    s = seq_change_str
+    s = s.replace("::", '')
+    s = s.replace("(+)", '')
+    s = s.replace("(–)", '')
+    
+    for annot_element in s.split("  "):
+        if annot_element in mob_sizes.keys():
+            mob_mut_size += mob_sizes[annot_element]
+        else:
+            s2 = annot_element
+            s2 = s2.replace("bp", '')
+            s2 = s2.replace(" ", '')
+            s2 = s2.replace("Δ", '')
+            s2 = s2.replace("+", '')
+            
+            val = 0
+            if s2.isdigit():
+                val = int(s2)
+            else:
+                val = len(s2)
+            if 'Δ' in annot_element:
+                val = (-1)*val
+                
+            mob_mut_size += val
+    
+    return mob_mut_size
+
+
 # Currently not returning the size of MOBs. Isn't something currently necessary.
 def get_mut_size(mut_df_row):
     mut_size = 0  # Currently defaulting everything except for INS and DEL to 0 since don't need them.
@@ -335,7 +404,8 @@ def get_mut_size(mut_df_row):
 
 
 # Returns the range of mutations to nucleotides in mutation region before mutation.
-def get_original_nuc_mut_range(mut_df_row):
+# TODO: don't use until the 2nd condition (DEL, INV, CON, SUB) is unit tested.
+'''def get_original_nuc_mut_range(mut_df_row):
     mut_range = (0,0)
     if mut_df_row["Mutation Type"] == "SNP" \
     or mut_df_row["Mutation Type"] == "INS" \
@@ -347,4 +417,4 @@ def get_original_nuc_mut_range(mut_df_row):
     or mut_df_row["Mutation Type"] == "CON" \
     or mut_df_row["Mutation Type"] == "SUB":
         mut_range = (mut_df_row["Position"], mut_df_row["Position"] - 1 + get_mut_size(mut_df_row))
-    return mut_range
+    return mut_range'''

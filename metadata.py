@@ -16,8 +16,8 @@ def get_condition_val_dict(metadata_file_path):
         reader = csv.reader(csvfile, delimiter=',', quotechar='"')
         for row in reader:
             condition_val_str = get_condition_val_str(row)
-            if '?' not in condition_val_str and 'none' not in condition_val_str:
-                condition_val_dict[row[0].lower()] = condition_val_str  # Some labels don't make sense if lowercase, like O2.
+#            if '?' not in condition_val_str and 'none' not in condition_val_str:
+            condition_val_dict[row[0].lower()] = condition_val_str  # Some labels don't make sense if lowercase, like O2.
                 # condition_val_dict[row[0].lower()] = condition_val_str.lower()
     return condition_val_dict
 
