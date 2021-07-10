@@ -3,8 +3,11 @@ from mut import get_inv_size, get_con_size, get_sub_size, get_del_size, get_ins_
 
 i = "[araD],araA,araB"
 e = ['araA', 'araB', 'araD']
-assert(get_clean_mut_gene_list(i).sort() == e.sort())
+assert(get_clean_mut_gene_list(i).sort() == e.sort())  # test without spaces between gene names
 assert(get_clean_mut_gene_list('[rph],[rph]') == ['rph', 'rph'])
+assert(get_clean_mut_gene_list("[asdf],zxcv,[qwer]") == ["asdf", "zxcv", "qwer"])
+assert(get_clean_mut_gene_list("asdf, zxcv") == ["asdf", "zxcv"])  # test with space between gene names
+
 i = {"Gene": "[araD],araA,araB", "Details": ''}
 assert(get_gene_count(i) == 3)
 
