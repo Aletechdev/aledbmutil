@@ -404,8 +404,7 @@ def get_mut_size(mut_df_row):
 
 
 # Returns the range of mutations to nucleotides in mutation region before mutation.
-# TODO: don't use until the 2nd condition (DEL, INV, CON, SUB) is unit tested.
-'''def get_original_nuc_mut_range(mut_df_row):
+def get_original_nuc_mut_range(mut_df_row):
     mut_range = (0,0)
     if mut_df_row["Mutation Type"] == "SNP" \
     or mut_df_row["Mutation Type"] == "INS" \
@@ -417,4 +416,4 @@ def get_mut_size(mut_df_row):
     or mut_df_row["Mutation Type"] == "CON" \
     or mut_df_row["Mutation Type"] == "SUB":
         mut_range = (mut_df_row["Position"], mut_df_row["Position"] - 1 + get_mut_size(mut_df_row))
-    return mut_range'''
+    return mut_range
