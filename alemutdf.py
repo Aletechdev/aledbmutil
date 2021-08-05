@@ -14,6 +14,14 @@ from mutil.mut import get_del_size, get_ins_size, get_inv_size, get_con_size, ge
 # TODO: Integrate functionality to get the series of fixed mutations defined by a final mutation with a frequency larger than a given threshold into this list of scripts. This functionality is implemented in substitution_rate_decline.ipynb.
 
 
+def get_exp_afir(mut):
+    return mut.exp + " " + get_afir(mut)
+
+
+def get_afir(mut):
+    return str(int(mut.ale)) + " " + str(int(mut.flask)) + " " + str(int(mut.isolate)) + " " + str(int(mut.tech_rep))
+
+
 def get_coding_muts_df(mut_df):
     coding_mut_df = mut_df[~mut_df["Details"].str.contains("intergenic")
                            & ~mut_df["Details"].str.contains("pseudogene")
