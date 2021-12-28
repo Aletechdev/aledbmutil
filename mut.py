@@ -7,6 +7,35 @@ import re
 CODON_NUCLEOTIDE_COUNT = 3
 
 
+# HYPERMUTATOR_GENES contains all synonyms for genes known to manifest hypermutator phenotypes after being mutated.
+# This list of genes is from 10.1016/S0966-842X(98)01424-3 and synonyms were retrieved from ecocyc.
+HYPERMUTATOR_GENES = {
+    "mutD", "dnaQ", "mutS", "ant", "plm", "fdv",
+    "mutL", "mutH", "mutR", "topB", "prv", 'uvrD',
+    "uvr502", "srjC", "uvrE", "dar-2", "dda",
+    "mutU", "pdeB", "rad", "recL", "mutM",
+    "fpg", "mutY", "micA", "mutT", "nudA",
+    "dnaE", "polC", "sdgC", 'polA', "resA",
+    "mutA", "glyV", "mutC", "glyW", "ins",
+    "dam", "miaA", "trpX", "sodA", "sodB",
+    "oxyR"  # We've had this one mutate in ALE experiments and not cause hypermutation, so don't include unless also checking if ALE is an outlier with mutation counts
+    "nth", "nei", "xthA", "xth", "nfo",
+    "ung", "vsr", "ada", "ogt", "recA",
+    "zab", "umuB", "tif", "lexB", "recH", "rnmB", "srf",
+    "recG", "radC", "spoV", "ssb", "exrB", "lexC"
+    "hns"  # We've had this one mutate in ALE experiments and not cause hypermutation, so don't include unless also checking if ALE is an outlier with mutation counts
+}
+
+
+def get_mutated_hypermutator_genes(m):
+    mutated_hypermutator_genes = set()
+    if m["coding"]: # Mutation affect a gene's nucleotides
+        mutated_genes_str = m["Gene"]
+        mutated_genes = set(get_clean_mut_gene_list(mutated_genes_str))
+        mutated_hypermutator_genes = mutated_genes & HYPERMUTATOR_GENES
+    return mutated_hypermutator_genes
+
+
 def get_MOB_type_str(MOB_seq_change_str):
     MOB_type_str = ""
     MOB_seq_change_str = MOB_seq_change_str.replace(u'\xa0', u' ')

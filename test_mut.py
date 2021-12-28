@@ -1,4 +1,12 @@
-from mut import get_inv_size, get_con_size, get_sub_size, get_del_size, get_ins_size, get_amp_size, is_coding_mut, get_MOB_type_str, get_codon_pos_chng, is_premature_stop_codon_SNP, is_start_codon_removal, get_SNP_aa_pos, get_gene_count, get_clean_mut_gene_list, get_DEL_INS_MOB_aa_start_pos, get_DEL_AA_set, predict_mutation_effect_on_feature
+from mut import get_inv_size, get_con_size, get_sub_size, get_del_size, get_ins_size, get_amp_size, is_coding_mut, get_MOB_type_str, get_codon_pos_chng, is_premature_stop_codon_SNP, is_start_codon_removal, get_SNP_aa_pos, get_gene_count, get_clean_mut_gene_list, get_DEL_INS_MOB_aa_start_pos, get_DEL_AA_set, predict_mutation_effect_on_feature, get_mutated_hypermutator_genes
+
+
+assert(get_mutated_hypermutator_genes({"coding": True, "Gene": "asdf, zxcv"}) == set())
+assert(get_mutated_hypermutator_genes({"coding": False, "Gene": "asdf, zxcv, mutL"}) == set())
+assert(get_mutated_hypermutator_genes({"coding": True, "Gene": "asdf, zxcv, mutL"}) == {"mutL"})
+assert(get_mutated_hypermutator_genes({"coding": True, "Gene": "mutA, asdf, zxcv, mutL"}) == {"mutA", "mutL"})
+assert(get_mutated_hypermutator_genes({"coding": True, "Gene": "asdf, zxcv, insB-5"}) == set())  # "ins" is a hypermutator genes; ensure that substrings aren't being identified as hypermutator genes with "insB-5".
+assert(get_mutated_hypermutator_genes({"coding": True, "Gene": '[ynaJ],uspE,fnr,ogt,abgT,abgB,abgA,abgR,mcaS,smrA,dgcM,zntB,fnrS,ynaL,dbpA,[ttcA]'}) == {"ogt"})  # testing complicated annotation string
 
 
 i = "[araD],araA,araB"
