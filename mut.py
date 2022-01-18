@@ -211,8 +211,10 @@ def get_DEL_INS_MOB_aa_start_pos(mut_details_str):
     if len(mut_details_str):
         start_char = '('
         end_char = '/'
-        if '‑' in mut_details_str:  # '‑' is the character that Breseq specificially uses for dashes rather than '-'
-            end_char = '‑'  # '‑' is the character that Breseq specificially uses for dashes rather than '-'
+        weirdly_encoded_dash_char = '‐'  # Breseq's weird encoding for the dash character
+        mut_details_str = mut_details_str.replace(weirdly_encoded_dash_char, '-')
+        if '-' in mut_details_str:
+            end_char = '-'
         nuc_pos = int(mut_details_str[mut_details_str.find(start_char) + 1 :mut_details_str.find(end_char)])
         aa_pos = math.ceil(nuc_pos/3)
     return aa_pos
