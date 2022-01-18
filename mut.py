@@ -243,6 +243,23 @@ def get_DEL_AA_set(mut_details_str):
     return set(range(rng[0], rng[1] + 1))  # Have to add 1 since also want to consider final position in the range
 
 
+def get_SUB_AA_range(mut_details_str):
+    print(mut_details_str)
+    SUB_AA_range = ()
+    aa_pos = None
+    if len(mut_details_str):  # '‑' is the character that Breseq specificially uses for dashes rather than '-':
+        start_char = '(' 
+        end_char = '/'
+        sub_str = mut_details_str[mut_details_str.find(start_char) + 1 :mut_details_str.find(end_char)]
+        weirdly_encoded_dash_char = '‐'  # Breseq's weird encoding for the dash character
+        sub_str = sub_str.replace(weirdly_encoded_dash_char, '-')
+        SUB_AA_range = sub_str.split('-')
+        SUB_AA_range[0] = int(SUB_AA_range[0])
+        SUB_AA_range[1] = int(SUB_AA_range[1])
+    return SUB_AA_range
+
+
+
 def get_codon_change_list(coding_SNP_details):
     codon_chng_str = coding_SNP_details[coding_SNP_details.find("(")+1:coding_SNP_details.find(")")]
     codon_change_list = codon_chng_str.split('→')

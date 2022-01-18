@@ -117,7 +117,6 @@ assert(get_DEL_INS_MOB_aa_start_pos("coding (1/20 nt)")==1)
 assert(get_DEL_INS_MOB_aa_start_pos("coding (4/20 nt)")==2)
 assert(get_DEL_INS_MOB_aa_start_pos("coding (58‑61/1413 nt)")==20)
 
-# The below also tests get_DEL_AA_range
 assert(get_DEL_AA_set("coding (1/20 nt)")=={1})  # test the removal of 1 BP from AA1
 assert(get_DEL_AA_set("coding (2/20 nt)")=={1})  # test the removal of 1 BP from AA1
 assert(get_DEL_AA_set("coding (3/20 nt)")=={1})  # test the removal of 1 BP from AA1
@@ -131,4 +130,7 @@ assert(get_DEL_AA_set("coding (6‑9/20 nt)")=={2,3})  # test for removal of som
 assert(get_DEL_AA_set("coding (6‑8/20 nt)")=={2,3})  # test for removal of some BPs for multiple AAs.
 assert(get_DEL_AA_set("coding (4‑11/20 nt)")=={2,3,4})  # test for removal of some BPs for 3 AAs.
 assert(get_DEL_AA_set("coding (2412‑2420/2547 nt")=={804, 805, 806, 807})  # 2412 is divisible by 3 == final nuc in an AA.
+
+assert(get_SUB_AA_range('coding (114‐115/1260 nt)')==(114,115))
+
 print("DONE")
