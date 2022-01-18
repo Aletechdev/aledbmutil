@@ -256,7 +256,7 @@ def get_SUB_AA_range(mut_details_str):
         SUB_AA_range = sub_str.split('-')
         SUB_AA_range[0] = int(SUB_AA_range[0])
         SUB_AA_range[1] = int(SUB_AA_range[1])
-    return SUB_AA_range
+    return tuple(SUB_AA_range)
 
 
 
