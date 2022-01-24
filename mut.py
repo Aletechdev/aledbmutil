@@ -211,7 +211,7 @@ def get_DEL_INS_MOB_aa_start_pos(mut_details_str):
     if len(mut_details_str):
         start_char = '('
         end_char = '/'
-        weirdly_encoded_dash_char = '‐'  # Breseq's weird encoding for the dash character
+        weirdly_encoded_dash_char = '‑'  # Breseq's weird encoding for the dash character
         mut_details_str = mut_details_str.replace(weirdly_encoded_dash_char, '-')
         if '-' in mut_details_str:
             end_char = '-'
@@ -226,7 +226,11 @@ def get_DEL_AA_range(mut_details_str):
         start_char = '(' 
         end_char = '/' 
         start_stop_str = mut_details_str[mut_details_str.find(start_char) + 1 : mut_details_str.find(end_char)]
-        l = start_stop_str.split('‑')  # '‑' is the character that Breseq specificially uses for dashes rather than '-'
+        weirdly_encoded_dash_char = '‑'  # Breseq's weird encoding for the dash character
+        start_stop_str = start_stop_str.replace(weirdly_encoded_dash_char, '-')
+        other_encoding = '‐'
+        start_stop_str = start_stop_str.replace(other_encoding, '-')
+        l = start_stop_str.split('-')
         ints = [int(x) for x in l]
         if len(l) > 1:
             start_aa_pos = math.ceil(ints[0]/3)
@@ -244,15 +248,16 @@ def get_DEL_AA_set(mut_details_str):
 
 
 def get_SUB_AA_range(mut_details_str):
-    print(mut_details_str)
     SUB_AA_range = ()
     aa_pos = None
-    if len(mut_details_str):  # '‑' is the character that Breseq specificially uses for dashes rather than '-':
+    if len(mut_details_str):
         start_char = '(' 
         end_char = '/'
         sub_str = mut_details_str[mut_details_str.find(start_char) + 1 :mut_details_str.find(end_char)]
-        weirdly_encoded_dash_char = '‐'  # Breseq's weird encoding for the dash character
+        weirdly_encoded_dash_char = '‑'
         sub_str = sub_str.replace(weirdly_encoded_dash_char, '-')
+        other_encoding = '‐'
+        sub_str = sub_str.replace(other_encoding, '-')
         SUB_AA_range = sub_str.split('-')
         SUB_AA_range[0] = int(SUB_AA_range[0])
         SUB_AA_range[1] = int(SUB_AA_range[1])

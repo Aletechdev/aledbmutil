@@ -1,4 +1,4 @@
-from mut import get_inv_size, get_con_size, get_sub_size, get_del_size, get_ins_size, get_amp_size, is_coding_mut, get_MOB_type_str, get_codon_pos_chng, is_premature_stop_codon_SNP, is_start_codon_removal, get_SNP_aa_pos, get_gene_count, get_clean_mut_gene_list, get_DEL_INS_MOB_aa_start_pos, get_DEL_AA_set, predict_mutation_effect_on_feature, get_mutated_hypermutator_genes
+from mut import get_inv_size, get_con_size, get_sub_size, get_del_size, get_ins_size, get_amp_size, is_coding_mut, get_MOB_type_str, get_codon_pos_chng, is_premature_stop_codon_SNP, is_start_codon_removal, get_SNP_aa_pos, get_gene_count, get_clean_mut_gene_list, get_DEL_INS_MOB_aa_start_pos, get_DEL_AA_set, predict_mutation_effect_on_feature, get_mutated_hypermutator_genes, get_SUB_AA_range, get_DEL_AA_range
 
 
 assert(get_mutated_hypermutator_genes({"coding": True, "Gene": "asdf, zxcv"}) == set())
@@ -116,6 +116,8 @@ assert(predict_mutation_effect_on_feature(None, f)=="other")
 assert(get_DEL_INS_MOB_aa_start_pos("coding (1/20 nt)")==1)
 assert(get_DEL_INS_MOB_aa_start_pos("coding (4/20 nt)")==2)
 assert(get_DEL_INS_MOB_aa_start_pos("coding (58‑61/1413 nt)")==20)
+
+assert(get_DEL_AA_range('coding (50‐62/1203 nt)')==(17,21))
 
 assert(get_DEL_AA_set("coding (1/20 nt)")=={1})  # test the removal of 1 BP from AA1
 assert(get_DEL_AA_set("coding (2/20 nt)")=={1})  # test the removal of 1 BP from AA1
