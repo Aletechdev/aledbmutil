@@ -483,3 +483,13 @@ def get_original_nuc_mut_range(mut_df_row):
     or mut_df_row["Mutation Type"] == "SUB":
         mut_range = (mut_df_row["Position"], mut_df_row["Position"] - 1 + get_mut_size(mut_df_row))
     return mut_range
+
+
+def get_SNP_rel_nuc_pos(coding_SNP_details):
+    rel_nuc_pos = ''
+    codon_chng_str = coding_SNP_details[coding_SNP_details.find("(")+1:coding_SNP_details.find(")")]
+    codon_nuc_pos = get_codon_pos_chng(codon_chng_str)
+    aa_sub_str = coding_SNP_details[:coding_SNP_details.find(' ')]
+    aa_sub = int(re.sub('\D', '', aa_sub_str))
+    rel_nuc_pos = ((aa_sub-1)*3) + codon_nuc_pos
+    return rel_nuc_pos
