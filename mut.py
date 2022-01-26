@@ -220,6 +220,19 @@ def get_DEL_INS_MOB_aa_start_pos(mut_details_str):
     return aa_pos
 
 
+def get_DEL_INS_MOB_nuc_start_pos(mut_details_str):
+    rel_nuc_pos = ''
+    if len(mut_details_str):
+        start_char = '(' 
+        end_char = '/' 
+        weirdly_encoded_dash_char = '‐'  # Breseq's weird encoding for the dash character
+        mut_details_str = mut_details_str.replace(weirdly_encoded_dash_char, '-')
+        if '-' in mut_details_str:
+            end_char = '-' 
+        rel_nuc_pos = int(mut_details_str[mut_details_str.find(start_char) + 1 :mut_details_str.find(end_char)])
+    return rel_nuc_pos
+
+
 def get_DEL_AA_range(mut_details_str):
     DEL_AA_range = ()
     if len(mut_details_str):
