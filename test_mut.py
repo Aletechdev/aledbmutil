@@ -1,5 +1,9 @@
-from mut import get_inv_size, get_con_size, get_sub_size, get_del_size, get_ins_size, get_amp_size, is_coding_mut, get_MOB_type_str, get_codon_pos_chng, is_premature_stop_codon_SNP, is_start_codon_removal, get_SNP_aa_pos, get_gene_count, get_clean_mut_gene_list, get_DEL_INS_MOB_aa_start_pos, get_DEL_AA_set, predict_mutation_effect_on_feature, get_mutated_hypermutator_genes, get_SUB_AA_range, get_DEL_AA_range, get_DEL_INS_MOB_nuc_start_pos, get_SNP_rel_nuc_pos
+from mut import get_inv_size, get_con_size, get_sub_size, get_del_size, get_ins_size, get_amp_size, is_coding_mut, get_MOB_type_str, get_codon_pos_chng, is_premature_stop_codon_SNP, is_start_codon_removal, get_SNP_aa_pos, get_gene_count, get_clean_mut_gene_list, get_DEL_INS_MOB_aa_start_pos, get_DEL_AA_set, predict_mutation_effect_on_feature, get_mutated_hypermutator_genes, get_SUB_AA_range, get_DEL_AA_range, get_DEL_INS_MOB_nuc_start_pos, get_SNP_rel_nuc_pos, get_SNP_nuc_chng
 
+
+assert(get_SNP_nuc_chng('K286* (AAA→TAA)')=='T')
+assert(get_SNP_nuc_chng('G61E (GGA→GAA)')=='A')
+assert(get_SNP_nuc_chng('a1b (ACC→ACG)')=='G')
 
 assert(get_SNP_rel_nuc_pos('A1B (AAA→TAA)')==1) # position 1 within codon (example codon given doesn't represent biological start codon)
 assert(get_SNP_rel_nuc_pos('A1B (AAA→ATA)')==2) # position 2 within codon (example codon given doesn't represent biological start codon)
