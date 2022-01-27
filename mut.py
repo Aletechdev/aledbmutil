@@ -135,7 +135,7 @@ def get_ins_size(seq_change_str):
     ins_size = 0
     if '→' in seq_change_str:
         before_seq_freq = int(seq_change_str[seq_change_str.find(')')+1:seq_change_str.find('→')])
-        after_seq_freq = int(seq_change_str[seq_change_str.find('→')+1:])  # Don't expect anything after the 
+        after_seq_freq = int(seq_change_str[seq_change_str.find('→')+1:]) 
         if "bp" in seq_change_str:
             seq_size = int(seq_change_str[seq_change_str.find('(')+1:seq_change_str.find(' bp')])
         else:
@@ -506,3 +506,19 @@ def get_SNP_nuc_chng(coding_SNP_details):
     codon_chng_idx = codon_chng_pos - 1
     nuc_chng = codon_change_list[1][codon_chng_idx]
     return nuc_chng
+
+
+def get_ins_seq(seq_change_str):
+    ins_seq = ''
+    if '→' in seq_change_str:
+        before_seq_freq = int(seq_change_str[seq_change_str.find(')')+1:seq_change_str.find('→')])
+        after_seq_freq = int(seq_change_str[seq_change_str.find('→')+1:])
+        if "bp" in seq_change_str:  # TODO: find an example of this type of mutation; not currently sure what to expect with this on.
+             # rare, more complicated to parse, and currently not occurring for mutation sets of interest, therefore not yet implementing.
+            assert False, "needs to be implemented"
+        else:
+            single_ins_seq = seq_change_str[seq_change_str.find('(')+1:seq_change_str.find(')')]
+            ins_seq = single_ins_seq * (after_seq_freq - before_seq_freq)
+    if '+' in seq_change_str:
+        ins_seq = seq_change_str[seq_change_str.find('+')+1:]
+    return ins_seq
