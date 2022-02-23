@@ -1,4 +1,4 @@
-from mut import get_inv_size, get_con_size, get_sub_size, get_del_size, get_ins_size, get_amp_size, is_coding_mut, get_MOB_type_str, get_codon_pos_chng, is_premature_stop_codon_SNP, is_start_codon_removal, get_SNP_aa_pos, get_gene_count, get_clean_mut_gene_list, get_DEL_INS_MOB_aa_start_pos, get_DEL_AA_set, predict_mutation_effect_on_feature, get_mutated_hypermutator_genes, get_SUB_AA_range, get_DEL_AA_range, get_DEL_INS_MOB_nuc_start_pos, get_SNP_rel_nuc_pos, get_SNP_nuc_chng, get_ins_seq
+from mut import get_inv_size, get_con_size, get_sub_size, get_del_size, get_ins_size, get_amp_size, is_coding_mut, get_MOB_type_str, get_codon_pos_chng, is_premature_stop_codon_SNP, is_start_codon_removal, get_SNP_aa_pos, get_gene_count, get_clean_mut_gene_list, get_DEL_INS_MOB_aa_start_pos, get_DEL_AA_set, predict_mutation_effect_on_feature, get_mutated_hypermutator_genes, get_SUB_AA_range, get_DEL_AA_range, get_DEL_INS_MOB_nuc_start_pos, get_SNP_rel_nuc_pos, get_SNP_nuc_chng, get_ins_seq, get_AA_from_nuc
 
 
 assert(get_ins_seq("+ATT")=='ATT')
@@ -153,6 +153,13 @@ assert(get_DEL_AA_set("coding (6‑8/20 nt)")=={2,3})  # test for removal of som
 assert(get_DEL_AA_set("coding (4‑11/20 nt)")=={2,3,4})  # test for removal of some BPs for 3 AAs.
 assert(get_DEL_AA_set("coding (2412‑2420/2547 nt")=={804, 805, 806, 807})  # 2412 is divisible by 3 == final nuc in an AA.
 
-assert(get_SUB_AA_range('coding (114‐115/1260 nt)')==(114,115))
+assert(get_AA_from_nuc(1)==1)
+assert(get_AA_from_nuc(2)==1)
+assert(get_AA_from_nuc(3)==1)
+assert(get_AA_from_nuc(4)==2)
+assert(get_AA_from_nuc(6)==2)
+assert(get_AA_from_nuc(7)==3)
+
+assert(get_SUB_AA_range("coding (114‐115/1260 nt")==(38,39))
 
 print("DONE")
