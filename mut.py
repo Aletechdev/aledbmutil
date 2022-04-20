@@ -205,14 +205,7 @@ def is_non_syn_SNP(amino_acid_change_str):
 def get_SNP_aa_pos(amino_acid_change_str):
     return int(re.sub("[^0-9]", "", amino_acid_change_str))
 
-
 import math
-
-
-def get_AA_from_nuc(nuc):
-    return math.ceil(nuc/3)
-
-
 def get_DEL_INS_MOB_aa_start_pos(mut_details_str):
     aa_pos = None
     if len(mut_details_str):
@@ -223,7 +216,7 @@ def get_DEL_INS_MOB_aa_start_pos(mut_details_str):
         if '-' in mut_details_str:
             end_char = '-'
         nuc_pos = int(mut_details_str[mut_details_str.find(start_char) + 1 :mut_details_str.find(end_char)])
-        aa_pos = get_AA_from_nuc(nuc_pos)
+        aa_pos = math.ceil(nuc_pos/3)
     return aa_pos
 
 
@@ -251,13 +244,13 @@ def get_DEL_AA_range(mut_details_str):
         other_encoding = '‐'
         start_stop_str = start_stop_str.replace(other_encoding, '-')
         l = start_stop_str.split('-')
-        nucs = [int(x) for x in l]
+        ints = [int(x) for x in l]
         if len(l) > 1:
-            start_aa_pos = get_AA_from_nuc(nucs[0])
-            stop_aa_pos = get_AA_from_nuc(nucs[1])
+            start_aa_pos = math.ceil(ints[0]/3)
+            stop_aa_pos = math.ceil(ints[1]/3)
             DEL_AA_range = (start_aa_pos, stop_aa_pos)
         else:
-            aa_pos_set = get_AA_from_nuc(nucs[0])
+            aa_pos_set = math.ceil(ints[0]/3)
             DEL_AA_range = (aa_pos_set, aa_pos_set)
     return DEL_AA_range
 
@@ -278,11 +271,10 @@ def get_SUB_AA_range(mut_details_str):
         sub_str = sub_str.replace(weirdly_encoded_dash_char, '-')
         other_encoding = '‐'
         sub_str = sub_str.replace(other_encoding, '-')
-        SUB_AA_nuc_rng = sub_str.split('-')
-        start_aa_pos = get_AA_from_nuc(int(SUB_AA_nuc_rng[0]))
-        stop_aa_pos = get_AA_from_nuc(int(SUB_AA_nuc_rng[1]))
-        SUB_AA_range = (start_aa_pos, stop_aa_pos)
-    return SUB_AA_range
+        SUB_AA_range = sub_str.split('-')
+        SUB_AA_range[0] = int(SUB_AA_range[0])
+        SUB_AA_range[1] = int(SUB_AA_range[1])
+    return tuple(SUB_AA_range)
 
 
 
@@ -497,7 +489,7 @@ def get_codon_nuc_chng_str(coding_SNP_details):
     return coding_SNP_details[coding_SNP_details.find("(")+1:coding_SNP_details.find(")")]
 
 
-def get_SNP_rel_nuc_pos(coding_SNP_details):
+def get_coding_SNP_rel_nuc_pos(coding_SNP_details):
     rel_nuc_pos = ''
     codon_chng_str = get_codon_nuc_chng_str(coding_SNP_details)
     codon_nuc_pos = get_codon_pos_chng(codon_chng_str)
@@ -507,13 +499,16 @@ def get_SNP_rel_nuc_pos(coding_SNP_details):
     return rel_nuc_pos
 
 
-def get_SNP_nuc_chng(coding_SNP_details):
-    nuc_chng=''
-    codon_change_list = get_codon_change_list(coding_SNP_details)
-    codon_chng_pos = get_codon_pos_chng(get_codon_nuc_chng_str(coding_SNP_details))
-    codon_chng_idx = codon_chng_pos - 1
-    nuc_chng = codon_change_list[1][codon_chng_idx]
-    return nuc_chng
+# example: ribosomal RNA
+def get_noncoding_SNP_rel_nuc_pos(noncoding_SNP_details):
+    start_idx = noncoding_SNP_details.find('(')
+    end_idx = noncoding_SNP_details.find('/')
+    rel_nuc_pos = noncoding_SNP_details[start_idx+1:end_idx]
+    return int(rel_nuc_pos)
+
+
+def get_genetic_SNP_nuc_chng(genetic_SNP_seq_change):
+    return genetic_SNP_seq_change[-1]
 
 
 def get_ins_seq(seq_change_str):
