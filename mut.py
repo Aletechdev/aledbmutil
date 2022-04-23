@@ -60,6 +60,8 @@ def is_frameshift(nuc_shift_size):
     return nuc_shift_size % 3 != 0
 
 
+# TODO: pseudogenes are coding, therefore should update this
+# and use a separate function for identifying pseudogenes.
 def is_coding_mut(mut_details_str):
     is_coding = True
     noncoding_term_l = ["intergenic", "noncoding", "pseudogene"]
@@ -499,15 +501,16 @@ def get_coding_SNP_rel_nuc_pos(coding_SNP_details):
     return rel_nuc_pos
 
 
-# example: ribosomal RNA
-def get_noncoding_SNP_rel_nuc_pos(noncoding_SNP_details):
-    start_idx = noncoding_SNP_details.find('(')
-    end_idx = noncoding_SNP_details.find('/')
-    rel_nuc_pos = noncoding_SNP_details[start_idx+1:end_idx]
-    return int(rel_nuc_pos)
+def get_genetic_coding_SNP_nuc_chng(SNP_details):
+    nuc_chng=''
+    codon_change_list = get_codon_change_list(SNP_details)
+    codon_chng_pos = get_codon_pos_chng(get_codon_nuc_chng_str(SNP_details))
+    codon_chng_idx = codon_chng_pos - 1
+    nuc_chng = codon_change_list[1][codon_chng_idx]
+    return nuc_chng
 
 
-def get_genetic_SNP_nuc_chng(genetic_SNP_seq_change):
+def get_genetic_noncoding_or_pseudogene_SNP_nuc_chng(genetic_SNP_seq_change):
     return genetic_SNP_seq_change[-1]
 
 
