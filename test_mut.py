@@ -1,4 +1,9 @@
-from mut import get_inv_size, get_con_size, get_sub_size, get_del_size, get_ins_size, get_amp_size, is_coding_mut, get_MOB_type_str, get_codon_pos_chng, is_premature_stop_codon_SNP, is_start_codon_removal, get_SNP_aa_pos, get_gene_count, get_clean_mut_gene_list, get_DEL_INS_MOB_aa_start_pos, get_DEL_AA_set, predict_mutation_effect_on_feature, get_mutated_hypermutator_genes, get_SUB_AA_range, get_DEL_AA_range, get_DEL_INS_MOB_nuc_start_pos, get_coding_SNP_rel_nuc_pos, get_genetic_coding_SNP_nuc_chng, get_genetic_noncoding_or_pseudogene_SNP_nuc_chng, get_ins_seq, get_noncoding_SNP_rel_nuc_pos
+from mut import get_inv_size, get_con_size, get_sub_size, get_del_size, get_ins_size, get_amp_size, is_coding_mut, \
+    get_MOB_type_str, get_codon_pos_chng, is_premature_stop_codon_SNP, is_start_codon_removal, get_SNP_aa_pos, \
+    get_gene_count, get_clean_mut_gene_list, get_DEL_INS_MOB_aa_start_pos, get_DEL_AA_set, \
+    predict_mutation_effect_on_feature, get_mutated_hypermutator_genes, get_SUB_AA_range, get_DEL_AA_range, \
+    get_DEL_INS_MOB_nuc_start_pos, get_coding_SNP_rel_nuc_pos, get_genetic_coding_SNP_nuc_chng, \
+    get_genetic_noncoding_or_pseudogene_SNP_nuc_chng, get_ins_seq, is_readthrough_codon_SNP
 
 
 assert(get_ins_seq("+ATT")=='ATT')
@@ -36,6 +41,24 @@ assert(get_clean_mut_gene_list('[rph],[rph]') == ['rph', 'rph'])
 assert(get_clean_mut_gene_list("[asdf],zxcv,[qwer]") == ["asdf", "zxcv", "qwer"])
 assert(get_clean_mut_gene_list("asdf, zxcv") == ["asdf", "zxcv"])  # test with space between gene names
 
+def are_lists_equivalent(L1, L2):
+    return len(L1) == len(L2) and sorted(L1) == sorted(L2)
+gene_list_str = "geneW"
+gene_list = ["geneW"]
+output_list = get_clean_mut_gene_list(gene_list_str)
+assert(are_lists_equivalent(output_list, gene_list))
+
+gene_list_str = "[rph], [rph]"
+gene_list = ["rph", "rph"]
+output_list = get_clean_mut_gene_list(gene_list_str)
+assert(are_lists_equivalent(output_list, gene_list))
+
+gene_list_str = "33 genesttcA>33 genes[ttcA], intR, ydaQ, ydaC, ralR, recT, recE, racC, ydaE, kilR, sieB, ydaF, ydaG, racR, ydaS, ydaT, ydaU, ydaV, ydaW, rzpR, rzoR, trkG, ynaK, ydaY, tmpR, lomR, insH1, lomR, stfR, tfaR, pinR, ynaE, > [ttcC]"
+gene_list = ["ttcA", "intR", "ydaQ", "ydaC", "ralR", "recT", "recE", "racC", "ydaE", "kilR", "sieB", "ydaF", "ydaG", "racR", "ydaS", "ydaT", "ydaU", "ydaV", "ydaW", "rzpR", "rzoR", "trkG", "ynaK", "ydaY", "tmpR", "lomR", "insH1", "lomR", "stfR", "tfaR", "pinR", "ynaE", "ttcC"]
+output_list = get_clean_mut_gene_list(gene_list_str)
+assert(are_lists_equivalent(output_list, gene_list))
+
+
 i = {"Gene": "[araD],araA,araB", "Details": ''}
 assert(get_gene_count(i) == 3)
 
@@ -61,6 +84,10 @@ assert(get_del_size("(T)60→50") == 10)
 assert(get_ins_size("(TTC)1→2") == 3)
 assert(get_ins_size("+GCTA") == 4)
 assert(get_ins_size("(45 bp)1→2") == 45)
+assert(get_ins_size("+TG")==2)
+assert(get_ins_size("+46 bp")==46)
+assert(get_ins_size("(CGGTGGCTG)1→2")==9)
+assert(get_ins_size("(ATCG)1→4")==12)
 
 assert(get_amp_size('36,044 bp x 3') == 72088)
 
@@ -79,6 +106,11 @@ assert(get_codon_pos_chng("AAC→AAT")==3)
 assert(get_codon_pos_chng("AAC→AAC")==0)
 
 assert(is_premature_stop_codon_SNP('P1100Q\xa0(CCG→TAG)\xa0'))
+assert(is_premature_stop_codon_SNP("R110G (CGT→GGT)")==False)
+assert(is_premature_stop_codon_SNP("XXXAW (TAT→TAA)")==True)
+
+assert(is_readthrough_codon_SNP("R110G (CGT→GGT)")==False)
+assert(is_readthrough_codon_SNP("XXXAW (TAA→TAC)")==True)
 
 assert(get_SNP_aa_pos("P1100Q") == 1100)
 

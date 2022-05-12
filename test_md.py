@@ -1,4 +1,4 @@
-from metadata import get_condition_val_str
+from md import get_condition_val_str
 
 
 input_list = ['a', 'b', 'c']

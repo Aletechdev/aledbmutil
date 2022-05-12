@@ -1,4 +1,5 @@
 import csv
+import os
 
 
 def get_condition_val_str(metadata_row_list):
@@ -16,9 +17,10 @@ def get_condition_val_dict(metadata_file_path):
         reader = csv.reader(csvfile, delimiter=',', quotechar='"')
         for row in reader:
             condition_val_str = get_condition_val_str(row)
-#            if '?' not in condition_val_str and 'none' not in condition_val_str:
-            condition_val_dict[row[0].lower()] = condition_val_str  # Some labels don't make sense if lowercase, like O2.
-                # condition_val_dict[row[0].lower()] = condition_val_str.lower()
+            # if '?' not in condition_val_str and 'none' not in condition_val_str:
+            condition_val_dict[
+                row[0].lower()] = condition_val_str  # Some labels don't make sense if lowercase, like O2.
+            # condition_val_dict[row[0].lower()] = condition_val_str.lower()
     return condition_val_dict
 
 
@@ -32,18 +34,15 @@ def get_condition_field_val_set(exp_metadata_dict):
     return condition_set
 
 
-import os
-
 def get_all_exp_cond_d(metadata_path):
-    all_exp_cond_d = dict()
-    
+
     all_exp_cond_d = {}
     for root, dirs, files in os.walk(metadata_path):
         for name in files:
             relative_file_path_str = str(root)+'/'+name
             d = get_condition_val_dict(relative_file_path_str)
             all_exp_cond_d[d["project"]] = d.copy()
-            
+
     # Removing poor annotation
     no_volume_str = "(0)"
     for m_d in all_exp_cond_d.values():
@@ -51,7 +50,7 @@ def get_all_exp_cond_d(metadata_path):
             if no_volume_str in value:
                 # Works because I'm changing reference.
                 m_d[key] = value.replace(no_volume_str, "")
-                
+
     # Adjusting internals of all_exp_cond_d
     # TODO: would probably be nicer code if I instead said which of these to keep.
     metadata_field_remove_l = [

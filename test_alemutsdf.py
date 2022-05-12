@@ -1,46 +1,12 @@
-# Not true unit tests, by serve current purpose.
+# Not true unit tests, but serves current purpose.
 # Meant to be executed as a script using command line Python.
 
 import pandas as pd
-from alemutdf import get_multi_exp_max_freq_mut_df, get_all_sample_mut_df, get_mut_dataframe, get_ALE_final_flask_df, get_exp_max_freq_mut_df, get_ALE_max_freq_mut_df, get_filtered_mut_df, get_coding_muts_df, get_clean_mut_gene_list, get_codon_change_list, is_premature_stop_codon_SNP, is_readthrough_codon_SNP, get_INS_size, has_regulatory_COG
+from alemutdf import get_multi_exp_max_freq_mut_df, get_all_sample_mut_df, get_mut_dataframe, get_ALE_final_flask_df, \
+    get_exp_max_freq_mut_df, get_ALE_max_freq_mut_df, get_filtered_mut_df, get_coding_muts_df
 
-
-MUT_DF_COLUMN_LIST = ['exp', 'ale', 'flask', 'isolate', 'tech_rep', 'presence', 'Position', 'Mutation Type', 'Sequence Change', 'Details', 'Gene']
-
-
-assert(get_INS_size("+TG")==2)
-assert(get_INS_size("+46 bp")==46)
-assert(get_INS_size("(CGGTGGCTG)1→2")==9)
-assert(get_INS_size("(ATCG)1→4")==12)
-
-
-assert(get_codon_change_list("XXXAW (TAT→TAA)")==["TAT", "TAA"])
-
-
-assert(is_premature_stop_codon_SNP("R110G (CGT→GGT)")==False)
-assert(is_premature_stop_codon_SNP("XXXAW (TAT→TAA)")==True)
-
-
-assert(is_readthrough_codon_SNP("R110G (CGT→GGT)")==False)
-assert(is_readthrough_codon_SNP("XXXAW (TAA→TAC)")==True)
-
-
-def are_lists_equivalent(L1, L2):
-    return len(L1) == len(L2) and sorted(L1) == sorted(L2)
-gene_list_str = "geneW"
-gene_list = ["geneW"]
-output_list = get_clean_mut_gene_list(gene_list_str)
-assert(are_lists_equivalent(output_list, gene_list))
-
-gene_list_str = "[rph], [rph]"
-gene_list = ["rph", "rph"]
-output_list = get_clean_mut_gene_list(gene_list_str)
-assert(are_lists_equivalent(output_list, gene_list))
-
-gene_list_str = "33 genesttcA>33 genes[ttcA], intR, ydaQ, ydaC, ralR, recT, recE, racC, ydaE, kilR, sieB, ydaF, ydaG, racR, ydaS, ydaT, ydaU, ydaV, ydaW, rzpR, rzoR, trkG, ynaK, ydaY, tmpR, lomR, insH1, lomR, stfR, tfaR, pinR, ynaE, > [ttcC]"
-gene_list = ["ttcA", "intR", "ydaQ", "ydaC", "ralR", "recT", "recE", "racC", "ydaE", "kilR", "sieB", "ydaF", "ydaG", "racR", "ydaS", "ydaT", "ydaU", "ydaV", "ydaW", "rzpR", "rzoR", "trkG", "ynaK", "ydaY", "tmpR", "lomR", "insH1", "lomR", "stfR", "tfaR", "pinR", "ynaE", "ttcC"]
-output_list = get_clean_mut_gene_list(gene_list_str)
-assert(are_lists_equivalent(output_list, gene_list))
+MUT_DF_COLUMN_LIST = ['exp', 'ale', 'flask', 'isolate', 'tech_rep', 'presence', 'Position', 'Mutation Type',
+                      'Sequence Change', 'Details', 'Gene']
 
 
 # get_coding_muts_df unit test
@@ -123,12 +89,6 @@ expected_df = pd.DataFrame(
      ['C13', 5, 54, 1, 1, 1.0, 3815810, 'DEL', 'Δ1\xa0bp', 'intergenic\xa0(‑42/+24)', 'pyrE, rph']],
     columns=['exp', 'ale', 'flask', 'isolate', 'tech_rep', 'presence', 'Position', 'Mutation Type', 'Sequence Change', 'Details', 'Gene'])
 assert(filtered_fixed_mut_df.equals(expected_df))
-
-
-assert (has_regulatory_COG("Mobilome: prophages, transposons")==True)
-assert (has_regulatory_COG("no COG")==False)
-assert (has_regulatory_COG("Mobilome: prophages, transposons;no COG")==True)
-assert (has_regulatory_COG("Carbohydrate transport and metabolism;no COG")==False)
 
 
 print("DONE")

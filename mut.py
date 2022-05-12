@@ -320,17 +320,6 @@ def is_start_codon_removal(coding_SNP_details):
     return is_start_codon_removal
 
 
-
-regulatory_COG_description_set = {"Mobilome: prophages, transposons","Posttranslational modification, protein turnover, chaperones","Signal transduction mechanisms","Transcription","Translation, ribosomal structure and biogenesis"}
-
-def has_regulatory_COG(cog_l_str):
-    has_regulatory_COG = False
-    cog_set = set(cog_l_str.split(';'))
-    if (cog_set & regulatory_COG_description_set) != set():
-        has_regulatory_COG = True
-    return has_regulatory_COG
-
-
 def is_regulatory(df_row):
     is_regulatory = False
     # Fast succeeding conditional structure

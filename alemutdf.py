@@ -1,14 +1,14 @@
 import os
 import os.path
-import pandas as pd
+import sys
+
 import numpy as np
+import pandas as pd
 from tqdm import tqdm
 
-import os, sys
-module_path = os.path.abspath(os.path.join('..'))
+module_path = os.path.abspath(os.path.join('.'))
 if module_path not in sys.path:
     sys.path.append(module_path)
-from mutil.mut import get_del_size, get_ins_size, get_inv_size, get_con_size, get_sub_size, get_amp_size, is_frameshift, is_coding_mut, is_premature_stop_codon_SNP, is_readthrough_codon_SNP, is_start_codon_removal
 
 
 # TODO: Integrate functionality to get the series of fixed mutations defined by a final mutation with a frequency larger than a given threshold into this list of scripts. This functionality is implemented in substitution_rate_decline.ipynb.
@@ -44,7 +44,7 @@ def get_genetic_muts_df(mut_df):
 def get_mut_dataframe(CSV_file_path,
                       include_dups = False,
                       intragenic_muts_only = False):
-    
+
     # Step 1: Import database
     raw_db = pd.read_csv(CSV_file_path)
     if 'Function' in raw_db.columns:
@@ -55,7 +55,7 @@ def get_mut_dataframe(CSV_file_path,
         raw_db = raw_db.drop('GO Process', axis=1)
     if 'GO Component' in raw_db.columns:
         raw_db = raw_db.drop('GO Component', axis=1)
-    
+
     # TODO: The below will crash if most than these columns. Needs to ignore other mutation columns.
     # Step 2: Separate columns based on usage
     keep_cols = ['Position','Mutation Type','Sequence Change','Details','Gene']
@@ -64,10 +64,10 @@ def get_mut_dataframe(CSV_file_path,
     if "Mut ID" in raw_db.columns:  # For backwards compatibility with older exported mutation data
         keep_cols.append("Mut ID")
     mut_cols = sorted(list(set(raw_db.columns) - set(keep_cols)))
-    
+
     file_name = os.path.basename(CSV_file_path)
     exp_name_from_file = file_name.replace(".csv", '')
-    
+
     # Step 3: Shift mutation column names into row identifiers
     csv_file_mutat_df = pd.DataFrame()
     for col in tqdm(mut_cols):
@@ -85,19 +85,19 @@ def get_mut_dataframe(CSV_file_path,
 
     csv_file_mutat_df = csv_file_mutat_df[['exp','ale','flask','isolate','tech_rep','presence'] + keep_cols]
     csv_file_mutat_df = csv_file_mutat_df.fillna('')
-    
+
     # Remove mutation entries with empty gene since they will screw up mutat_df.groupby(['Gene', ...])
     csv_file_mutat_df = csv_file_mutat_df.loc[csv_file_mutat_df['Gene'] != '']
-    
+
     # Remove weird characters between gene names in multiple gene annotation.
     csv_file_mutat_df['Gene'] = csv_file_mutat_df['Gene'].str.replace("  ", " ")
-    
+
     if not include_dups:
         csv_file_mutat_df = csv_file_mutat_df.loc[csv_file_mutat_df['Details'] != 'Duplication']
-    
+
     if intragenic_muts_only:
         csv_file_mutat_df = csv_file_mutat_df.loc[csv_file_mutat_df['Gene'].str.contains(',') == False]
-    
+
     return csv_file_mutat_df
 
 
@@ -110,7 +110,7 @@ def get_all_sample_mut_df(dir_path,
         file_path = dir_path+'/'+file_name
         print(file_path)
         mutat_df_list.append(get_mut_dataframe(file_path, include_dups, intragenic_muts_only))
-        
+
     mutat_df = pd.concat(mutat_df_list)
     return mutat_df
 
@@ -138,7 +138,7 @@ def get_gene_mut_mat(exp_ale_mut_gene_df):
             del mut_df[column_to_delete]
     mut_df = mut_df.drop_duplicates()
     mut_df["exp ale"] = mut_df["exp"]+' '+mut_df["ale"].map(str)
-    
+
     mut_df_column_name_set = _get_exp_ale_set(mut_df)
 
     # Get mut_mat_df indexes of Gene names.
@@ -152,14 +152,14 @@ def get_gene_mut_mat(exp_ale_mut_gene_df):
     for gene_name, all_gene_mut_df in mut_df.groupby("Gene"):
         for index, mut_df_row in all_gene_mut_df.iterrows():
             mut_mat_df.loc[gene_name, mut_df_row["exp ale"]] = 1
-    
+
     return mut_mat_df
 
 
 def get_gene_mut_count_mat(exp_ale_mut_gene_df):
     mut_df = exp_ale_mut_gene_df.copy()
     mut_df["exp ale"] = mut_df["exp"]+' '+mut_df["ale"].map(str)
-    
+
     mut_df_column_name_set = _get_exp_ale_set(mut_df)
 
     # Get mut_mat_df indexes of Gene names.
@@ -173,7 +173,7 @@ def get_gene_mut_count_mat(exp_ale_mut_gene_df):
     for gene_name, all_gene_mut_df in mut_df.groupby("Gene"):
         for index, mut_df_row in all_gene_mut_df.iterrows():
             mut_mat_df.loc[gene_name, mut_df_row["exp ale"]] += 1
-    
+
     return mut_mat_df
 
 
@@ -193,7 +193,7 @@ def get_mut_mat(exp_ale_mut_gene_df):
     mut_df = mut_df.drop_duplicates()
     mut_df["exp ale"] = mut_df["exp"] + ' ' + mut_df["ale"].map(str)
     mut_df["gene seq change"] = mut_df["Gene"] + ' ' + mut_df["Sequence Change"]
-    
+
     mut_df_column_name_set = _get_exp_ale_set(mut_df)  # Get unique set of exp+ALE#
 
     mut_df_index_set = set(mut_df["gene seq change"].tolist())  # Get unique set of gene+(seq change) names.
@@ -203,7 +203,7 @@ def get_mut_mat(exp_ale_mut_gene_df):
     for mut, all_mut_df in mut_df.groupby("gene seq change"):
         for index, mut_df_row in all_mut_df.iterrows():
             mut_mat_df.loc[mut, mut_df_row["exp ale"]] = 1
-    
+
     return mut_mat_df
 
 
@@ -261,7 +261,7 @@ def get_ALE_max_freq_mut_df(ALE_mut_df, endpoint_flask_only):
     df = pd.DataFrame()
     #  List of everything that defines a mutation besides instance values (freq, isolate#, etc.)
     mutation_descriptors_list = ["Position", "Mutation Type", "Sequence Change", "Details", "Gene"]
-    for mut_group in ALE_mut_df.groupby(mutation_descriptors_list): 
+    for mut_group in ALE_mut_df.groupby(mutation_descriptors_list):
         mut_df = mut_group[1]
         if len(mut_df) > 0:
             df = df.append(_get_max_freq_mut_df(mut_df))
@@ -301,14 +301,14 @@ def get_filtered_mut_df(fixed_mut_df, filter_mut_df):
 
 # Filtering for fixed mutation SERIES that have a max freq larger than mut_freq_floor.
 def get_filtered_fixed_mut_series_df(fixed_mut_df, mut_freq_floor):
-    
+
     # TODO: Seems like building the filter_mut_df could be replaced with _get_max_freq_mut_df(...),
     # though need to make unit test to clarify.
     filter_mut_df_list = []
     for exp_name, exp_mut_df in fixed_mut_df.groupby(["exp"]):
         filter_mut_df_list.append(get_exp_max_freq_mut_df(exp_mut_df, endpoint_flask_only=True))
     filter_mut_df = pd.concat(filter_mut_df_list)
-    
+
     filter_mut_df = filter_mut_df[filter_mut_df["presence"]>mut_freq_floor]
     return get_filtered_mut_df(fixed_mut_df, filter_mut_df)
 
@@ -355,7 +355,7 @@ def get_mut_type_frac_across_class_df(mut_df, exp_level_l, mut_type_class, all_m
         for mut_type in all_mut_type_class_set:
             mut_type_count = len(exp_ale_max_mut_df[exp_ale_max_mut_df[mut_type_class]==mut_type])
             mut_type_frac = mut_type_count/len(exp_ale_max_mut_df)
-            
+
             if len(exp_level_l) > 1:
                 l = list(class_tup)
             else:
@@ -370,7 +370,7 @@ def get_mut_type_frac_across_class_df(mut_df, exp_level_l, mut_type_class, all_m
 def get_mut_type_avg_frac_across_class_df(mut_df, exp_level_l, mut_type_class, all_mut_type_class_set):
     mut_type_frac_df = get_mut_type_frac_across_class_df(mut_df, exp_level_l, mut_type_class, all_mut_type_class_set)
     class_avg_mut_type_frac_df = pd.DataFrame()
-    
+
     # !!! Assuming the first class is the final class to consider penetration across
     final_penetration_class = exp_level_l[0]
     for tup, mut_type_df in mut_type_frac_df.groupby([final_penetration_class, mut_type_class]):
@@ -380,5 +380,19 @@ def get_mut_type_avg_frac_across_class_df(mut_df, exp_level_l, mut_type_class, a
         df = pd.DataFrame([[final_class_type, mut_type, mut_type_class_type_mean]],
                           columns=[final_penetration_class, mut_type_class, "fraction"])
         class_avg_mut_type_frac_df = class_avg_mut_type_frac_df.append(df)
-    
+
     return class_avg_mut_type_frac_df
+
+
+def get_standardized_annotations(muts_df):
+    # Different experiments have different strings for position (some with commas, some without),
+    # therefore going ahead and changing them all to integers
+    muts_df.Position = muts_df.Position.apply(lambda x: int(str(x).replace(",", "")))
+    muts_df.Position = muts_df.Position.astype(int)
+
+    # This work is also currently duplicated NB4. Keep the implementation here and remove the code from NB4
+    muts_df["Gene"] = muts_df["Gene"].apply(lambda a: "rph" if a == "[rph], [rph]" else a)
+    muts_df["Gene"] = muts_df["Gene"].apply(lambda a: "rph" if a == "[rph],[rph]" else a)
+    muts_df.head()
+
+    return muts_df
