@@ -112,24 +112,17 @@ def get_sub_size(seq_change_str):
     return sub_size
 
 
-def _get_before_after_seq_change_size(seq_change_str):
-    before_after_seq_change_size = 0
-    if '→' in seq_change_str:
-        s = seq_change_str[:seq_change_str.find('→')]
-        before_size_str = ''.join([i for i in s if i.isdigit()])
-        s = seq_change_str[seq_change_str.find('→')+1:]
-        after_size_str = ''.join([i for i in s if i.isdigit()])
-        before_after_seq_change_size = int(before_size_str) - int(after_size_str)
-    return before_after_seq_change_size
-
-
 def get_del_size(seq_change_str):
     del_size = 0
     if 'Δ' in seq_change_str or 'δ' in seq_change_str:
         del_size_str = ''.join([i for i in seq_change_str if i.isdigit()])
         del_size = int(del_size_str)
     if '→' in seq_change_str:
-        del_size = _get_before_after_seq_change_size(seq_change_str)
+        before_seq_freq = int(seq_change_str[seq_change_str.find(')')+1:seq_change_str.find('→')])
+        after_seq_freq = int(seq_change_str[seq_change_str.find('→')+1:])
+        seq_str = seq_change_str[seq_change_str.find('(')+1:seq_change_str.find(')')]
+        seq_size = len(seq_str)
+        del_size = (before_seq_freq * seq_size) - (after_seq_freq * seq_size)
     return del_size
 
 
@@ -143,9 +136,12 @@ def get_ins_size(seq_change_str):
         else:
             seq_str = seq_change_str[seq_change_str.find('(')+1:seq_change_str.find(')')]
             seq_size = len(seq_str)
-        ins_size = after_seq_freq * seq_size - before_seq_freq * seq_size
+        ins_size = (after_seq_freq * seq_size) - (before_seq_freq * seq_size)
     if '+' in seq_change_str:
-        ins_size = len(seq_change_str[seq_change_str.find('+')+1:])
+        if 'bp' in seq_change_str:
+            ins_size = int(seq_change_str[seq_change_str.find('+')+1:seq_change_str.find(' ')])
+        else:
+            ins_size = len(seq_change_str[seq_change_str.find('+')+1:])
     return ins_size
 
 
@@ -338,17 +334,23 @@ STRINGS_TO_REMOVE = [" > ", "]", "[", "</i>", "<i>", "<b>", "</b>", "<BR>"]
 def get_clean_mut_gene_list(gene_list_str):
     for s in STRINGS_TO_REMOVE:
         if s in gene_list_str:
-            gene_list_str = gene_list_str.replace(s, "")
+            if s == " > ":
+                gene_list_str = gene_list_str.replace(s, " ")
+            else:
+                gene_list_str = gene_list_str.replace(s, "")
+    # print(gene_list_str)
+
     if "genes" in gene_list_str:
-        start_idx = gene_list_str.rfind("genes")+len("genes")
+        start_idx = gene_list_str.rfind("genes") + len("genes")
         gene_list_str = gene_list_str[start_idx:]
-        
+
     split_str = ", "
     if split_str not in gene_list_str:
         split_str = ","
-    
+
     mut_gene_list = gene_list_str.split(split_str)
     clean_mut_gene_list = [gene for gene in mut_gene_list]
+
     return clean_mut_gene_list
 
 
