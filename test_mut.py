@@ -99,6 +99,7 @@ assert (get_ins_size("+GCTA") == 4)
 assert (get_ins_size("(45 bp)1→2") == 45)
 assert (get_ins_size("+TG") == 2)
 assert (get_ins_size("+46 bp") == 46)
+assert (get_ins_size("+CGG") == 3)
 assert (get_ins_size("(CGGTGGCTG)1→2") == 9)
 assert (get_ins_size("(ATCG)1→4") == 12)
 

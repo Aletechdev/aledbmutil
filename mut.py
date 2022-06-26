@@ -144,7 +144,10 @@ def get_ins_size(seq_change_str):
             seq_size = len(seq_str)
         ins_size = after_seq_freq * seq_size - before_seq_freq * seq_size
     if '+' in seq_change_str:
-        ins_size = len(seq_change_str[seq_change_str.find('+') + 1:])
+        if 'bp' in seq_change_str:
+            ins_size = int(seq_change_str[seq_change_str.find('+') + 1:seq_change_str.find(' bp')])
+        else:
+            ins_size = len(seq_change_str[seq_change_str.find('+') + 1:])  # assuming it's just a sequence being added
     return ins_size
 
 
