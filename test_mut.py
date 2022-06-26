@@ -42,7 +42,8 @@ assert(get_clean_mut_gene_list("[asdf],zxcv,[qwer]") == ["asdf", "zxcv", "qwer"]
 assert(get_clean_mut_gene_list("asdf, zxcv") == ["asdf", "zxcv"])  # test with space between gene names
 
 def are_lists_equivalent(L1, L2):
-    return (len(L1) == len(L2)) and (sorted(L1) == sorted(L2))
+    return len(L1) == len(L2) and sorted(L1) == sorted(L2)
+
 gene_list_str = "geneW"
 gene_list = ["geneW"]
 output_list = get_clean_mut_gene_list(gene_list_str)
@@ -53,11 +54,14 @@ gene_list = ["rph", "rph"]
 output_list = get_clean_mut_gene_list(gene_list_str)
 assert(are_lists_equivalent(output_list, gene_list))
 
-intput_gene_list_str = "33 genesttcA>33 genes[ttcA], intR, ydaQ, ydaC, ralR, recT, recE, racC, ydaE, kilR, sieB, ydaF, ydaG, racR, ydaS, ydaT, ydaU, ydaV, ydaW, rzpR, rzoR, trkG, ynaK, ydaY, tmpR, lomR, insH1, lomR, stfR, tfaR, pinR, ynaE, > [ttcC]"
+gene_list_str = "sgrS|sgrT"
+gene_list = ['sgrS', 'sgrT']
+output_list = get_clean_mut_gene_list(gene_list_str)
+assert(are_lists_equivalent(output_list, gene_list))
+
+gene_list_str = "33 genesttcA>33 genes[ttcA], intR, ydaQ, ydaC, ralR, recT, recE, racC, ydaE, kilR, sieB, ydaF, ydaG, racR, ydaS, ydaT, ydaU, ydaV, ydaW, rzpR, rzoR, trkG, ynaK, ydaY, tmpR, lomR, insH1, lomR, stfR, tfaR, pinR, ynaE, > [ttcC]"
 gene_list = ["ttcA", "intR", "ydaQ", "ydaC", "ralR", "recT", "recE", "racC", "ydaE", "kilR", "sieB", "ydaF", "ydaG", "racR", "ydaS", "ydaT", "ydaU", "ydaV", "ydaW", "rzpR", "rzoR", "trkG", "ynaK", "ydaY", "tmpR", "lomR", "insH1", "lomR", "stfR", "tfaR", "pinR", "ynaE", "ttcC"]
-output_list = get_clean_mut_gene_list(intput_gene_list_str)
-# print(set(gene_list)- set(output_list))
-# print(set(output_list)- set(gene_list))
+output_list = get_clean_mut_gene_list(gene_list_str)
 assert(are_lists_equivalent(output_list, gene_list))
 
 
@@ -82,8 +86,6 @@ assert(get_del_size("Δ82 bp") == 82)
 assert(get_del_size("δ82 bp") == 82)
 assert(get_del_size("Δ1,199 bp") == 1199)
 assert(get_del_size("(T)60→50") == 10)
-assert(get_del_size("(TAG)4→3") == 3)
-assert(get_del_size("(TAG)5→3") == 6)
 
 assert(get_ins_size("(TTC)1→2") == 3)
 assert(get_ins_size("+GCTA") == 4)

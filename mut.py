@@ -1,11 +1,9 @@
 import re
 
-
 # Could enhance code structure through strategy pattern: https://sourcemaking.com/design_patterns/strategy, https://sourcemaking.com/design_patterns/strategy/python/1
 
 
 CODON_NUCLEOTIDE_COUNT = 3
-
 
 # HYPERMUTATOR_GENES contains all synonyms for genes known to manifest hypermutator phenotypes after being mutated.
 # This list of genes is from 10.1016/S0966-842X(98)01424-3 and synonyms were retrieved from ecocyc.
@@ -23,13 +21,14 @@ HYPERMUTATOR_GENES = {
     "ung", "vsr", "ada", "ogt", "recA",
     "zab", "umuB", "tif", "lexB", "recH", "rnmB", "srf",
     "recG", "radC", "spoV", "ssb", "exrB", "lexC"
-    "hns"  # We've had this one mutate in ALE experiments and not cause hypermutation, so don't include unless also checking if ALE is an outlier with mutation counts
+                                           "hns"
+    # We've had this one mutate in ALE experiments and not cause hypermutation, so don't include unless also checking if ALE is an outlier with mutation counts
 }
 
 
 def get_mutated_hypermutator_genes(m):
     mutated_hypermutator_genes = set()
-    if m["coding"]: # Mutation affect a gene's nucleotides
+    if m["coding"]:  # Mutation affect a gene's nucleotides
         mutated_genes_str = m["Gene"]
         mutated_genes = set(get_clean_mut_gene_list(mutated_genes_str))
         mutated_hypermutator_genes = mutated_genes & HYPERMUTATOR_GENES
@@ -44,12 +43,12 @@ def get_MOB_type_str(MOB_seq_change_str):
         MOB_str_ID = "IS"
     elif "REP" in MOB_seq_change_str:
         MOB_str_ID = "REP"
-    
+
     if MOB_str_ID != "":
         IS_str_start_idx = MOB_seq_change_str.find(MOB_str_ID)
         IS_str_end_idx = MOB_seq_change_str.find(' ', IS_str_start_idx)
         MOB_type_str = MOB_seq_change_str[IS_str_start_idx:IS_str_end_idx]
-        
+
     return MOB_type_str
 
 
@@ -103,7 +102,7 @@ def get_sub_size(seq_change_str):
     sub_size = 0
     before_seq_change_str = seq_change_str[:seq_change_str.find('→')]
     before_seq_change_size = int(''.join([i for i in before_seq_change_str if i.isdigit()]))
-    after_seq_change_str = seq_change_str[seq_change_str.find('→')+1:]
+    after_seq_change_str = seq_change_str[seq_change_str.find('→') + 1:]
     if "bp" in after_seq_change_str:
         after_seq_change_size = int(''.join([i for i in after_seq_change_str if i.isdigit()]))
         sub_size = before_seq_change_size - after_seq_change_size  # expecting these types of substitutions to always shrink in size
@@ -112,36 +111,40 @@ def get_sub_size(seq_change_str):
     return sub_size
 
 
+def _get_before_after_seq_change_size(seq_change_str):
+    before_after_seq_change_size = 0
+    if '→' in seq_change_str:
+        s = seq_change_str[:seq_change_str.find('→')]
+        before_size_str = ''.join([i for i in s if i.isdigit()])
+        s = seq_change_str[seq_change_str.find('→') + 1:]
+        after_size_str = ''.join([i for i in s if i.isdigit()])
+        before_after_seq_change_size = int(before_size_str) - int(after_size_str)
+    return before_after_seq_change_size
+
+
 def get_del_size(seq_change_str):
     del_size = 0
     if 'Δ' in seq_change_str or 'δ' in seq_change_str:
         del_size_str = ''.join([i for i in seq_change_str if i.isdigit()])
         del_size = int(del_size_str)
     if '→' in seq_change_str:
-        before_seq_freq = int(seq_change_str[seq_change_str.find(')')+1:seq_change_str.find('→')])
-        after_seq_freq = int(seq_change_str[seq_change_str.find('→')+1:])
-        seq_str = seq_change_str[seq_change_str.find('(')+1:seq_change_str.find(')')]
-        seq_size = len(seq_str)
-        del_size = (before_seq_freq * seq_size) - (after_seq_freq * seq_size)
+        del_size = _get_before_after_seq_change_size(seq_change_str)
     return del_size
 
 
 def get_ins_size(seq_change_str):
     ins_size = 0
     if '→' in seq_change_str:
-        before_seq_freq = int(seq_change_str[seq_change_str.find(')')+1:seq_change_str.find('→')])
-        after_seq_freq = int(seq_change_str[seq_change_str.find('→')+1:]) 
+        before_seq_freq = int(seq_change_str[seq_change_str.find(')') + 1:seq_change_str.find('→')])
+        after_seq_freq = int(seq_change_str[seq_change_str.find('→') + 1:])
         if "bp" in seq_change_str:
-            seq_size = int(seq_change_str[seq_change_str.find('(')+1:seq_change_str.find(' bp')])
+            seq_size = int(seq_change_str[seq_change_str.find('(') + 1:seq_change_str.find(' bp')])
         else:
-            seq_str = seq_change_str[seq_change_str.find('(')+1:seq_change_str.find(')')]
+            seq_str = seq_change_str[seq_change_str.find('(') + 1:seq_change_str.find(')')]
             seq_size = len(seq_str)
-        ins_size = (after_seq_freq * seq_size) - (before_seq_freq * seq_size)
+        ins_size = after_seq_freq * seq_size - before_seq_freq * seq_size
     if '+' in seq_change_str:
-        if 'bp' in seq_change_str:
-            ins_size = int(seq_change_str[seq_change_str.find('+')+1:seq_change_str.find(' ')])
-        else:
-            ins_size = len(seq_change_str[seq_change_str.find('+')+1:])
+        ins_size = len(seq_change_str[seq_change_str.find('+') + 1:])
     return ins_size
 
 
@@ -149,7 +152,7 @@ def get_amp_size(seq_change_str):
     seq_len_str = seq_change_str[:seq_change_str.find(' bp')]
     seq_len_str = seq_len_str.replace(',', '')
     seq_len = int(seq_len_str)
-    multiplicity = int(seq_change_str[seq_change_str.find('x ')+len('x '):])
+    multiplicity = int(seq_change_str[seq_change_str.find('x ') + len('x '):])
     seq_insertion_size = (multiplicity - 1) * seq_len
     return seq_insertion_size
 
@@ -167,8 +170,8 @@ def is_in_TRN(details_str, gene_str, trn_gene_set):
     is_in_TRN = False
     if "intergenic" not in details_str:
         gene_list_str = gene_str
-        gene_list_str = gene_list_str.replace('[','')
-        gene_list_str = gene_list_str.replace(']','')
+        gene_list_str = gene_list_str.replace('[', '')
+        gene_list_str = gene_list_str.replace(']', '')
         gene_set = set(gene_list_str.split(', '))
         for gene in gene_set:
             if gene in trn_gene_set:
@@ -203,7 +206,10 @@ def is_non_syn_SNP(amino_acid_change_str):
 def get_SNP_aa_pos(amino_acid_change_str):
     return int(re.sub("[^0-9]", "", amino_acid_change_str))
 
+
 import math
+
+
 def get_DEL_INS_MOB_aa_start_pos(mut_details_str):
     aa_pos = None
     if len(mut_details_str):
@@ -213,30 +219,30 @@ def get_DEL_INS_MOB_aa_start_pos(mut_details_str):
         mut_details_str = mut_details_str.replace(weirdly_encoded_dash_char, '-')
         if '-' in mut_details_str:
             end_char = '-'
-        nuc_pos = int(mut_details_str[mut_details_str.find(start_char) + 1 :mut_details_str.find(end_char)])
-        aa_pos = math.ceil(nuc_pos/3)
+        nuc_pos = int(mut_details_str[mut_details_str.find(start_char) + 1:mut_details_str.find(end_char)])
+        aa_pos = math.ceil(nuc_pos / 3)
     return aa_pos
 
 
 def get_DEL_INS_MOB_nuc_start_pos(mut_details_str):
     rel_nuc_pos = ''
     if len(mut_details_str):
-        start_char = '(' 
-        end_char = '/' 
+        start_char = '('
+        end_char = '/'
         weirdly_encoded_dash_char = '‐'  # Breseq's weird encoding for the dash character
         mut_details_str = mut_details_str.replace(weirdly_encoded_dash_char, '-')
         if '-' in mut_details_str:
-            end_char = '-' 
-        rel_nuc_pos = int(mut_details_str[mut_details_str.find(start_char) + 1 :mut_details_str.find(end_char)])
+            end_char = '-'
+        rel_nuc_pos = int(mut_details_str[mut_details_str.find(start_char) + 1:mut_details_str.find(end_char)])
     return rel_nuc_pos
 
 
 def get_DEL_AA_range(mut_details_str):
     DEL_AA_range = ()
     if len(mut_details_str):
-        start_char = '(' 
-        end_char = '/' 
-        start_stop_str = mut_details_str[mut_details_str.find(start_char) + 1 : mut_details_str.find(end_char)]
+        start_char = '('
+        end_char = '/'
+        start_stop_str = mut_details_str[mut_details_str.find(start_char) + 1: mut_details_str.find(end_char)]
         weirdly_encoded_dash_char = '‑'  # Breseq's weird encoding for the dash character
         start_stop_str = start_stop_str.replace(weirdly_encoded_dash_char, '-')
         other_encoding = '‐'
@@ -244,11 +250,11 @@ def get_DEL_AA_range(mut_details_str):
         l = start_stop_str.split('-')
         ints = [int(x) for x in l]
         if len(l) > 1:
-            start_aa_pos = math.ceil(ints[0]/3)
-            stop_aa_pos = math.ceil(ints[1]/3)
+            start_aa_pos = math.ceil(ints[0] / 3)
+            stop_aa_pos = math.ceil(ints[1] / 3)
             DEL_AA_range = (start_aa_pos, stop_aa_pos)
         else:
-            aa_pos_set = math.ceil(ints[0]/3)
+            aa_pos_set = math.ceil(ints[0] / 3)
             DEL_AA_range = (aa_pos_set, aa_pos_set)
     return DEL_AA_range
 
@@ -262,9 +268,9 @@ def get_SUB_AA_range(mut_details_str):
     SUB_AA_range = ()
     aa_pos = None
     if len(mut_details_str):
-        start_char = '(' 
+        start_char = '('
         end_char = '/'
-        sub_str = mut_details_str[mut_details_str.find(start_char) + 1 :mut_details_str.find(end_char)]
+        sub_str = mut_details_str[mut_details_str.find(start_char) + 1:mut_details_str.find(end_char)]
         weirdly_encoded_dash_char = '‑'
         sub_str = sub_str.replace(weirdly_encoded_dash_char, '-')
         other_encoding = '‐'
@@ -273,7 +279,6 @@ def get_SUB_AA_range(mut_details_str):
         SUB_AA_range[0] = int(SUB_AA_range[0])
         SUB_AA_range[1] = int(SUB_AA_range[1])
     return tuple(SUB_AA_range)
-
 
 
 def get_codon_change_list(coding_SNP_details):
@@ -289,7 +294,7 @@ def is_premature_stop_codon_SNP(coding_SNP_details):
     wt_codon = codon_chng_list[0]
     mut_codon = codon_chng_list[1]
     if is_non_syn_SNP(aa_chng_str) and is_stop_codon(mut_codon):
-            is_premature_stop_codon_SNP = True
+        is_premature_stop_codon_SNP = True
     return is_premature_stop_codon_SNP
 
 
@@ -300,8 +305,8 @@ def is_readthrough_codon_SNP(coding_SNP_details):
     wt_codon = codon_change_list[0]
     mut_codon = codon_change_list[1]
     if is_non_syn_SNP(aa_chng_str) \
-        and is_stop_codon(wt_codon) and not is_stop_codon(mut_codon):
-            is_readthrough_codon_SNP = True
+            and is_stop_codon(wt_codon) and not is_stop_codon(mut_codon):
+        is_readthrough_codon_SNP = True
     return is_readthrough_codon_SNP
 
 
@@ -326,43 +331,39 @@ def is_regulatory(df_row):
     else:
         cog_l_str = df_row["COG description"]
         is_regulatory = has_regulatory_COG(cog_l_str)
-        
+
     return is_regulatory
 
 
-STRINGS_TO_REMOVE = [" > ", "]", "[", "</i>", "<i>", "<b>", "</b>", "<BR>"]
+STRINGS_TO_REMOVE = [' ', ">", "[", "]", "</i>", "<i>", "<b>", "</b>", "<BR>"]
+
+
 def get_clean_mut_gene_list(gene_list_str):
     for s in STRINGS_TO_REMOVE:
         if s in gene_list_str:
-            if s == " > ":
-                gene_list_str = gene_list_str.replace(s, " ")
-            else:
-                gene_list_str = gene_list_str.replace(s, "")
-    # print(gene_list_str)
-
+            gene_list_str = gene_list_str.replace(s, "")
     if "genes" in gene_list_str:
         start_idx = gene_list_str.rfind("genes") + len("genes")
         gene_list_str = gene_list_str[start_idx:]
 
-    split_str = ", "
-    if split_str not in gene_list_str:
-        split_str = ","
+    split_str = ","
+    if '|' in gene_list_str:
+        split_str = "|"
 
     mut_gene_list = gene_list_str.split(split_str)
     clean_mut_gene_list = [gene for gene in mut_gene_list]
-
     return clean_mut_gene_list
 
 
 def get_gene_count(mut_df_row):
-    target_count = 0 
+    target_count = 0
     breseq_gene_annot_row = "Gene"
     if "mutation target annotation" in mut_df_row.keys():  # "mutation target annotation" used in AVA
         breseq_gene_annot_row = "mutation target annotation"
     gene_list_str = mut_df_row[breseq_gene_annot_row]
     mut_details_str = mut_df_row["Details"]
     if "intergenic" in mut_details_str:
-        target_count = 1 
+        target_count = 1
     else:
         gene_set = set(get_clean_mut_gene_list(gene_list_str))
         target_count = len(gene_set)
@@ -377,7 +378,8 @@ OPERATIONAL_LEVEL = 1
 def is_disruptive_SNP(mut_df_row):
     is_disruptive_SNP = False
     if mut_df_row["Mutation Type"].lower() == "snp" and mut_df_row["coding"]:
-        if is_premature_stop_codon_SNP(mut_df_row["Details"]) or is_readthrough_codon_SNP(mut_df_row["Details"]) or is_start_codon_removal(mut_df_row["Details"]):
+        if is_premature_stop_codon_SNP(mut_df_row["Details"]) or is_readthrough_codon_SNP(
+                mut_df_row["Details"]) or is_start_codon_removal(mut_df_row["Details"]):
             is_disruptive_SNP = True
     return is_disruptive_SNP
 
@@ -385,9 +387,9 @@ def is_disruptive_SNP(mut_df_row):
 # TODO: Not currently checking if pseudogenes are being further disrupted. Pseudogenes can still be translates; need to check if they get further disrupted.
 def predict_mutation_effect_on_feature(mutation, feature):
     pred_eff = "other"
-    
+
     if feature["feature type"] != "unknown":
-        
+
         # Code block is for SVs
         if mutation["Mutation Type"].lower() in ["ins", "del", "mob"]:
             if feature["feature type"] == "gene":
@@ -406,19 +408,18 @@ def predict_mutation_effect_on_feature(mutation, feature):
                     pred_eff = "nonsynonymous"
                 else:
                     pred_eff = "synonymous"
-    
+
     return pred_eff
 
 
 def get_mob_size(seq_change_str, mob_sizes):
-    
     mob_mut_size = 0
-    
+
     s = seq_change_str
     s = s.replace("::", '')
     s = s.replace("(+)", '')
     s = s.replace("(–)", '')
-    
+
     for annot_element in s.split("  "):
         if annot_element in mob_sizes.keys():
             mob_mut_size += mob_sizes[annot_element]
@@ -428,17 +429,17 @@ def get_mob_size(seq_change_str, mob_sizes):
             s2 = s2.replace(" ", '')
             s2 = s2.replace("Δ", '')
             s2 = s2.replace("+", '')
-            
+
             val = 0
             if s2.isdigit():
                 val = int(s2)
             else:
                 val = len(s2)
             if 'Δ' in annot_element:
-                val = (-1)*val
-                
+                val = (-1) * val
+
             mob_mut_size += val
-    
+
     return mob_mut_size
 
 
@@ -464,22 +465,22 @@ def get_mut_size(mut_df_row):
 
 # Returns the range of mutations to nucleotides in mutation region before mutation.
 def get_original_nuc_mut_range(mut_df_row):
-    mut_range = (0,0)
+    mut_range = (0, 0)
     if mut_df_row["Mutation Type"] == "SNP" \
-    or mut_df_row["Mutation Type"] == "INS" \
-    or mut_df_row["Mutation Type"] == "MOB" \
-    or mut_df_row["Mutation Type"] == "AMP":
+            or mut_df_row["Mutation Type"] == "INS" \
+            or mut_df_row["Mutation Type"] == "MOB" \
+            or mut_df_row["Mutation Type"] == "AMP":
         mut_range = (mut_df_row["Position"], mut_df_row["Position"])
     elif mut_df_row["Mutation Type"] == "DEL" \
-    or mut_df_row["Mutation Type"] == "INV" \
-    or mut_df_row["Mutation Type"] == "CON" \
-    or mut_df_row["Mutation Type"] == "SUB":
+            or mut_df_row["Mutation Type"] == "INV" \
+            or mut_df_row["Mutation Type"] == "CON" \
+            or mut_df_row["Mutation Type"] == "SUB":
         mut_range = (mut_df_row["Position"], mut_df_row["Position"] - 1 + get_mut_size(mut_df_row))
     return mut_range
 
 
 def get_codon_nuc_chng_str(coding_SNP_details):
-    return coding_SNP_details[coding_SNP_details.find("(")+1:coding_SNP_details.find(")")]
+    return coding_SNP_details[coding_SNP_details.find("(") + 1:coding_SNP_details.find(")")]
 
 
 def get_coding_SNP_rel_nuc_pos(coding_SNP_details):
@@ -488,12 +489,12 @@ def get_coding_SNP_rel_nuc_pos(coding_SNP_details):
     codon_nuc_pos = get_codon_pos_chng(codon_chng_str)
     aa_sub_str = coding_SNP_details[:coding_SNP_details.find(' ')]
     aa_sub = get_SNP_aa_pos(aa_sub_str)
-    rel_nuc_pos = ((aa_sub-1)*3) + codon_nuc_pos
+    rel_nuc_pos = ((aa_sub - 1) * 3) + codon_nuc_pos
     return rel_nuc_pos
 
 
 def get_genetic_coding_SNP_nuc_chng(SNP_details):
-    nuc_chng=''
+    nuc_chng = ''
     codon_change_list = get_codon_change_list(SNP_details)
     codon_chng_pos = get_codon_pos_chng(get_codon_nuc_chng_str(SNP_details))
     codon_chng_idx = codon_chng_pos - 1
@@ -508,14 +509,14 @@ def get_genetic_noncoding_or_pseudogene_SNP_nuc_chng(genetic_SNP_seq_change):
 def get_ins_seq(seq_change_str):
     ins_seq = ''
     if '→' in seq_change_str:
-        before_seq_freq = int(seq_change_str[seq_change_str.find(')')+1:seq_change_str.find('→')])
-        after_seq_freq = int(seq_change_str[seq_change_str.find('→')+1:])
+        before_seq_freq = int(seq_change_str[seq_change_str.find(')') + 1:seq_change_str.find('→')])
+        after_seq_freq = int(seq_change_str[seq_change_str.find('→') + 1:])
         if "bp" in seq_change_str:  # TODO: find an example of this type of mutation; not currently sure what to expect with this on.
-             # rare, more complicated to parse, and currently not occurring for mutation sets of interest, therefore not yet implementing.
+            # rare, more complicated to parse, and currently not occurring for mutation sets of interest, therefore not yet implementing.
             assert False, "needs to be implemented"
         else:
-            single_ins_seq = seq_change_str[seq_change_str.find('(')+1:seq_change_str.find(')')]
+            single_ins_seq = seq_change_str[seq_change_str.find('(') + 1:seq_change_str.find(')')]
             ins_seq = single_ins_seq * (after_seq_freq - before_seq_freq)
     if '+' in seq_change_str:
-        ins_seq = seq_change_str[seq_change_str.find('+')+1:]
+        ins_seq = seq_change_str[seq_change_str.find('+') + 1:]
     return ins_seq
