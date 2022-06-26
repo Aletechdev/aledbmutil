@@ -321,20 +321,6 @@ def is_start_codon_removal(coding_SNP_details):
     return is_start_codon_removal
 
 
-def is_regulatory(df_row):
-    is_regulatory = False
-    # Fast succeeding conditional structure
-    if df_row["coding"] == False:
-        is_regulatory = True
-    elif df_row["TRN"] == True:
-        is_regulatory = True
-    else:
-        cog_l_str = df_row["COG description"]
-        is_regulatory = has_regulatory_COG(cog_l_str)
-
-    return is_regulatory
-
-
 STRINGS_TO_REMOVE = [' ', ">", "[", "]", "</i>", "<i>", "<b>", "</b>", "<BR>"]
 
 
