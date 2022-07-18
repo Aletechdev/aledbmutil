@@ -59,10 +59,12 @@ def get_mut_dataframe(CSV_file_path,
     # TODO: The below will crash if most than these columns. Needs to ignore other mutation columns.
     # Step 2: Separate columns based on usage
     keep_cols = ['Position','Mutation Type','Sequence Change','Details','Gene']
-    if  "Reference Seq" in raw_db.columns:  # For backwards compatibility with older exported mutation data
+    if "Reference Seq" in raw_db.columns:  # For backwards compatibility with older exported mutation data
         keep_cols.append("Reference Seq")
     if "Mut ID" in raw_db.columns:  # For backwards compatibility with older exported mutation data
         keep_cols.append("Mut ID")
+    if 'Gene (Scrollable)' in raw_db.columns:  # For new ensemble ALEdb
+        raw_db.rename(columns={'Gene (Scrollable)': 'Gene'}, inplace=True)
     mut_cols = sorted(list(set(raw_db.columns) - set(keep_cols)))
 
     file_name = os.path.basename(CSV_file_path)
