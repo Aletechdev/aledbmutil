@@ -72,7 +72,8 @@ def get_mut_dataframe(CSV_file_path,
 
     # Step 3: Shift mutation column names into row identifiers
     csv_file_mutat_df = pd.DataFrame()
-    for col in tqdm(mut_cols):
+    # for col in tqdm(mut_cols):
+    for col in mut_cols:  # Causing issues with too much output in NBs.
         df = raw_db[raw_db[col].notnull()][keep_cols]
         exp_name = '_'.join(col.split(' ')[:-4])
         if exp_name == '':  # Will happen with newer mutation data exported from ALEdb
@@ -110,7 +111,7 @@ def get_all_sample_mut_df(dir_path,
     mutat_df_list = []
     for file_name in os.listdir(dir_path):
         file_path = dir_path+'/'+file_name
-        print(file_path)
+        # print(file_path)
         mutat_df_list.append(get_mut_dataframe(file_path, include_dups, intragenic_muts_only))
 
     mutat_df = pd.concat(mutat_df_list)
