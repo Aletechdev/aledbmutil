@@ -41,12 +41,19 @@ def get_genetic_muts_df(mut_df):
     return df
 
 
+import traceback
+import chardet
+
+
 def get_mut_dataframe(CSV_file_path,
                       include_dups = False,
                       intragenic_muts_only = False):
 
+    with open(CSV_file_path, 'rb') as rawdata:
+        result = chardet.detect(rawdata.read(100000))
+
     # Step 1: Import database
-    raw_db = pd.read_csv(CSV_file_path)
+    raw_db = pd.read_csv(CSV_file_path, encoding=result['encoding'])
     if 'Function' in raw_db.columns:
         raw_db = raw_db.drop('Function', axis=1)
     if 'Product' in raw_db.columns:
@@ -72,34 +79,40 @@ def get_mut_dataframe(CSV_file_path,
 
     # Step 3: Shift mutation column names into row identifiers
     csv_file_mutat_df = pd.DataFrame()
-    # for col in tqdm(mut_cols):
-    for col in mut_cols:  # Causing issues with too much output in NBs.
-        df = raw_db[raw_db[col].notnull()][keep_cols]
-        exp_name = '_'.join(col.split(' ')[:-4])
-        if exp_name == '':  # Will happen with newer mutation data exported from ALEdb
-            exp_name = exp_name_from_file
-        df['exp'] = exp_name
-        df['ale'] = int(col.split(' ')[-4][1:])
-        df['flask'] = int(col.split(' ')[-3][1:])
-        df['isolate'] = int(col.split(' ')[-2][1:])
-        df['tech_rep'] = int(col.split(' ')[-1][1:])
-        df['presence'] = raw_db[raw_db[col].notnull()][col]
-        csv_file_mutat_df = pd.concat([csv_file_mutat_df,df])
 
-    csv_file_mutat_df = csv_file_mutat_df[['exp','ale','flask','isolate','tech_rep','presence'] + keep_cols]
-    csv_file_mutat_df = csv_file_mutat_df.fillna('')
+    try:
+        for col in mut_cols:
+            df = raw_db[raw_db[col].notnull()][keep_cols]
+            exp_name = '_'.join(col.split(' ')[:-4])
+            if exp_name == '':  # Will happen with newer mutation data exported from ALEdb
+                exp_name = exp_name_from_file
+            df['exp'] = exp_name
+            df['ale'] = int(col.split(' ')[-4][1:])
+            df['flask'] = int(col.split(' ')[-3][1:])
+            df['isolate'] = int(col.split(' ')[-2][1:])
+            df['tech_rep'] = int(col.split(' ')[-1][1:])
 
-    # Remove mutation entries with empty gene since they will screw up mutat_df.groupby(['Gene', ...])
-    csv_file_mutat_df = csv_file_mutat_df.loc[csv_file_mutat_df['Gene'] != '']
+            df['presence'] = raw_db[raw_db[col].notnull()][col]
+            csv_file_mutat_df = pd.concat([csv_file_mutat_df,df])
 
-    # Remove weird characters between gene names in multiple gene annotation.
-    csv_file_mutat_df['Gene'] = csv_file_mutat_df['Gene'].str.replace("  ", " ")
+        csv_file_mutat_df = csv_file_mutat_df[['exp','ale','flask','isolate','tech_rep','presence'] + keep_cols]
+        csv_file_mutat_df = csv_file_mutat_df.fillna('')
 
-    if not include_dups:
-        csv_file_mutat_df = csv_file_mutat_df.loc[csv_file_mutat_df['Details'] != 'Duplication']
+        # Remove mutation entries with empty gene since they will screw up mutat_df.groupby(['Gene', ...])
+        csv_file_mutat_df = csv_file_mutat_df.loc[csv_file_mutat_df['Gene'] != '']
 
-    if intragenic_muts_only:
-        csv_file_mutat_df = csv_file_mutat_df.loc[csv_file_mutat_df['Gene'].str.contains(',') == False]
+        # Remove weird characters between gene names in multiple gene annotation.
+        csv_file_mutat_df['Gene'] = csv_file_mutat_df['Gene'].str.replace("  ", " ")
+
+        if not include_dups:
+            csv_file_mutat_df = csv_file_mutat_df.loc[csv_file_mutat_df['Details'] != 'Duplication']
+
+        if intragenic_muts_only:
+            csv_file_mutat_df = csv_file_mutat_df.loc[csv_file_mutat_df['Gene'].str.contains(',') == False]
+    except Exception as e:
+        print("Issue with file: " + CSV_file_path)
+        print(e)
+        print(traceback.print_exc())
 
     return csv_file_mutat_df
 
