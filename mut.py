@@ -401,6 +401,29 @@ def predict_mutation_effect_on_feature(mutation, feature):
     return pred_eff
 
 
+# For direct use with breseq mutations to a gene
+def predict_mutation_effect_on_gene(mutation):
+    pred_eff = "other"
+
+    # Code block for SVs
+    if mutation["Mutation Type"].lower() in ["ins", "del", "mob"]:
+        if is_frameshift(mutation["mutation size"]):
+            pred_eff = "truncation"
+    
+    # Code block for SNPs
+    if mutation["Mutation Type"].lower() == "snp":
+        if is_disruptive_SNP(mutation):
+            pred_eff = "truncation"
+        else:
+            aa_chng_str = mutation["Details"].split()[0]
+            if is_non_syn_SNP(aa_chng_str):
+                pred_eff = "nonsynonymous"
+            else:
+                pred_eff = "synonymous"
+
+    return pred_eff
+
+
 def get_mob_size(seq_change_str, mob_sizes):
     mob_mut_size = 0
 
