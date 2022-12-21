@@ -132,3 +132,59 @@ def get_gene_bnum(RegDB_obj_ID, regdb_gene_synonym_df):
     if len(g_bnum_df) > 0:
         gene_bnum = g_bnum_df.iloc[0]["OBJECT_SYNONYM_NAME"]
     return gene_bnum
+
+
+import pandas as pd
+
+def make_regulondb_gene_synonym_df():
+    gene_df = pd.read_csv("./data/gene.txt", sep="\t", comment='#', header=None)
+    gene_df.columns = [
+        "GENE_ID",
+        "GENE_NAME",
+        "GENE_POSLEFT",
+        "GENE_POSRIGHT",
+        "GENE_STRAND",
+        "GENE_SEQUENCE",
+        "GC_CONTENT",
+        "CRI_SCORE",
+        "GENE_NOTE",
+        "GENE_INTERNAL_COMMENT",
+        "KEY_ID_ORG",
+        "GENE_TYPE",
+        "GENE_NOTE_WEB"
+    ]
+
+    gene_synonym_df = pd.read_csv(
+        "./data/object_synonym.txt",
+        sep="\t",
+        comment='#',
+        header=None,
+        quoting=3
+    )
+    gene_synonym_df.columns = ["OBJECT_ID", "OBJECT_SYNONYM_NAME", "OS_INTERNAL_COMMENT", "KEY_ID_ORG"]
+
+    gene_id_name_df = pd.DataFrame()
+    for _, g in gene_df.iterrows():
+        srs = pd.Series({'GENE_ID': g['GENE_ID'], 'GENE_NAME': g['GENE_NAME']})
+        df = pd.DataFrame(srs).T
+
+        gn_syn_df = gene_synonym_df[gene_synonym_df["OBJECT_ID"] == g["GENE_ID"]]
+        gn_syn_df = gn_syn_df[['OBJECT_ID', 'OBJECT_SYNONYM_NAME']]
+        gn_syn_df.rename(columns={'OBJECT_ID': 'GENE_ID', 'OBJECT_SYNONYM_NAME': 'GENE_NAME'}, inplace=True)
+
+        gene_id_name_df = pd.concat([gene_id_name_df, df, gn_syn_df])
+    gene_id_name_df = gene_id_name_df[gene_id_name_df.GENE_NAME.notna()]
+
+    gene_name_syn_df = pd.DataFrame()
+    for g, gdf in gene_id_name_df.groupby(['GENE_ID']):
+        bnum_df = gdf[gdf['GENE_NAME'].str.contains('^b\d{4}')]
+        if len(bnum_df) > 0:
+            bnum = bnum_df['GENE_NAME'].iloc[0]
+            df = gdf.copy()
+            df.rename(columns={'GENE_ID': 'BNUM'}, inplace=True)
+            df.BNUM = bnum
+            df = df[df['GENE_NAME'] != bnum]  # removing unnecessary bnum row
+            gene_name_syn_df = pd.concat([gene_name_syn_df, df])
+    gene_name_syn_df.BNUM = gene_name_syn_df.BNUM.apply(lambda s: s.replace(' (obsolete)', ''))
+
+    gene_name_syn_df.to_csv('./data/gene_name_syn_df.csv', index=False)
