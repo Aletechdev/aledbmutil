@@ -1,3 +1,6 @@
+import pandas as pd
+
+
 RNAP_GENE_NAMES = [
     "fecI",
     "fliA",
@@ -125,16 +128,14 @@ def get_gene_pos_d(gene_name, genes_df):
     return gene_pos_d
 
 
-def get_gene_bnum(RegDB_obj_ID, regdb_gene_synonym_df):
-    gene_bnum = ""
-    g_synonym_df = regdb_gene_synonym_df[regdb_gene_synonym_df["OBJECT_ID"]==RegDB_obj_ID]
-    g_bnum_df = g_synonym_df[g_synonym_df["OBJECT_SYNONYM_NAME"].str.contains('^b\d{4}')]
-    if len(g_bnum_df) > 0:
-        gene_bnum = g_bnum_df.iloc[0]["OBJECT_SYNONYM_NAME"]
-    return gene_bnum
+def get_gene_bnum(gene_name):
+    bnum = ''
+    all_gene_bnum_name_df = pd.read_csv('./data/gene_name_syn_df.csv')
+    gene_bnum_name_df =all_gene_bnum_name_df[all_gene_bnum_name_df["GENE_NAME"]==gene_name]
+    if len(gene_bnum_name_df) > 0:
+        bnum = gene_bnum_name_df.iloc[0]["BNUM"]
+    return bnum
 
-
-import pandas as pd
 
 def make_regulondb_gene_synonym_df():
     gene_df = pd.read_csv("./data/gene.txt", sep="\t", comment='#', header=None)
