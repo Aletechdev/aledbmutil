@@ -128,10 +128,13 @@ def get_gene_pos_d(gene_name, genes_df):
     return gene_pos_d
 
 
-def get_gene_bnum(gene_name):
+# Essentially just expecting all_gene_bnum_name_df to be the local ./data/gene_name_syn_df.csv file.
+# TODO: find a better way to load this data rather than expecting it as a parameter.
+def get_gene_bnum(gene_name, all_gene_bnum_name_df):
     bnum = ''
-    all_gene_bnum_name_df = pd.read_csv('./data/gene_name_syn_df.csv')
-    gene_bnum_name_df =all_gene_bnum_name_df[all_gene_bnum_name_df["GENE_NAME"]==gene_name]
+    # all_gene_bnum_name_df = pd.read_csv('./data/gene_name_syn_df.csv')  # Too slow to do with every call
+    # all_gene_bnum_name_df = pd.read_csv(gene_name_bnum_df_csv)
+    gene_bnum_name_df = all_gene_bnum_name_df[all_gene_bnum_name_df["GENE_NAME"] == gene_name]
     if len(gene_bnum_name_df) > 0:
         bnum = gene_bnum_name_df.iloc[0]["BNUM"]
     return bnum
