@@ -313,6 +313,23 @@ def is_readthrough_codon_SNP(coding_SNP_details):
     return is_readthrough_codon_SNP
 
 
+def get_clean_mut_gene_list(gene_list_str):
+    for s in STRINGS_TO_REMOVE:
+        if s in gene_list_str:
+            gene_list_str = gene_list_str.replace(s, "")
+    if "genes" in gene_list_str:
+        start_idx = gene_list_str.rfind("genes") + len("genes")
+        gene_list_str = gene_list_str[start_idx:]
+
+    split_str = ","
+    if '|' in gene_list_str:
+        split_str = "|"
+
+    mut_gene_list = gene_list_str.split(split_str)
+    clean_mut_gene_list = [gene for gene in mut_gene_list]
+    return clean_mut_gene_list
+
+
 def is_start_codon_removal(coding_SNP_details):
     is_start_codon_removal = False
     aa_chng_str = coding_SNP_details.split()[0]
