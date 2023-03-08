@@ -213,13 +213,21 @@ def get_SNP_aa_pos(amino_acid_change_str):
 import math
 
 
+def _replace_weirdly_encoded_dash_char(mut_details_str):
+    weirdly_encoded_dash_char_1 = '‑'  # Breseq's weird encoding for the dash character
+    weirdly_encoded_dash_char_2 = '‐'  # Another Breseq weirdly encoded dash character
+    for c in [weirdly_encoded_dash_char_1, weirdly_encoded_dash_char_2]:
+        if c in mut_details_str:
+            mut_details_str = mut_details_str.replace(c, '-')        
+    return mut_details_str
+
+
 def get_DEL_INS_MOB_aa_start_pos(mut_details_str):
     aa_pos = None
+    mut_details_str = _replace_weirdly_encoded_dash_char(mut_details_str)
     if len(mut_details_str):
         start_char = '('
         end_char = '/'
-        weirdly_encoded_dash_char = '‑'  # Breseq's weird encoding for the dash character
-        mut_details_str = mut_details_str.replace(weirdly_encoded_dash_char, '-')
         if '-' in mut_details_str:
             end_char = '-'
         nuc_pos = int(mut_details_str[mut_details_str.find(start_char) + 1:mut_details_str.find(end_char)])
@@ -228,12 +236,11 @@ def get_DEL_INS_MOB_aa_start_pos(mut_details_str):
 
 
 def get_DEL_INS_MOB_nuc_start_pos(mut_details_str):
+    mut_details_str = _replace_weirdly_encoded_dash_char(mut_details_str)
     rel_nuc_pos = ''
     if len(mut_details_str):
         start_char = '('
         end_char = '/'
-        weirdly_encoded_dash_char = '‐'  # Breseq's weird encoding for the dash character
-        mut_details_str = mut_details_str.replace(weirdly_encoded_dash_char, '-')
         if '-' in mut_details_str:
             end_char = '-'
         rel_nuc_pos = int(mut_details_str[mut_details_str.find(start_char) + 1:mut_details_str.find(end_char)])
@@ -241,16 +248,15 @@ def get_DEL_INS_MOB_nuc_start_pos(mut_details_str):
 
 
 def get_DEL_AA_range(mut_details_str):
+    mut_details_str = _replace_weirdly_encoded_dash_char(mut_details_str)
     DEL_AA_range = ()
     if len(mut_details_str):
+
         start_char = '('
         end_char = '/'
         start_stop_str = mut_details_str[mut_details_str.find(start_char) + 1: mut_details_str.find(end_char)]
-        weirdly_encoded_dash_char = '‑'  # Breseq's weird encoding for the dash character
-        start_stop_str = start_stop_str.replace(weirdly_encoded_dash_char, '-')
-        other_encoding = '‐'
-        start_stop_str = start_stop_str.replace(other_encoding, '-')
         l = start_stop_str.split('-')
+
         ints = [int(x) for x in l]
         if len(l) > 1:
             start_aa_pos = math.ceil(ints[0] / 3)
@@ -269,15 +275,11 @@ def get_DEL_AA_set(mut_details_str):
 
 def get_SUB_AA_range(mut_details_str):
     SUB_AA_range = ()
-    aa_pos = None
+    mut_details_str = _replace_weirdly_encoded_dash_char(mut_details_str)
     if len(mut_details_str):
         start_char = '('
         end_char = '/'
         sub_str = mut_details_str[mut_details_str.find(start_char) + 1:mut_details_str.find(end_char)]
-        weirdly_encoded_dash_char = '‑'
-        sub_str = sub_str.replace(weirdly_encoded_dash_char, '-')
-        other_encoding = '‐'
-        sub_str = sub_str.replace(other_encoding, '-')
         SUB_AA_range = sub_str.split('-')
         SUB_AA_range[0] = int(SUB_AA_range[0])
         SUB_AA_range[1] = int(SUB_AA_range[1])

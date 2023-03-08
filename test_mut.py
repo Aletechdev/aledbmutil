@@ -179,9 +179,12 @@ assert (predict_mutation_effect_on_feature(m, f) == "truncation")
 f = {"feature type": "unknown"}
 assert (predict_mutation_effect_on_feature(None, f) == "other")
 
+weirdly_encoded_dash_char_1 = '‑'  # Breseq's weird encoding for the dash character
+weirdly_encoded_dash_char_2 = '‐'  # Another Breseq weirdly encoded dash character
 assert (get_DEL_INS_MOB_aa_start_pos("coding (1/20 nt)") == 1)
 assert (get_DEL_INS_MOB_aa_start_pos("coding (4/20 nt)") == 2)
-assert (get_DEL_INS_MOB_aa_start_pos("coding (58‑61/1413 nt)") == 20)
+assert (get_DEL_INS_MOB_aa_start_pos("coding (58"+weirdly_encoded_dash_char_1+"61/1413 nt)") == 20)  # one type of weird hash character
+assert (get_DEL_INS_MOB_aa_start_pos("coding (58"+weirdly_encoded_dash_char_2+"61/1413 nt)") == 20)  # another type of weird hash character
 
 assert (get_DEL_AA_range('coding (50‐62/1203 nt)') == (17, 21))
 
