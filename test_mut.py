@@ -1,7 +1,7 @@
 from mut import get_inv_size, get_con_size, get_sub_size, get_del_size, get_ins_size, get_amp_size, is_coding_mut, \
     get_MOB_type_str, get_codon_pos_chng, is_premature_stop_codon_SNP, is_start_codon_removal, get_SNP_aa_pos, \
     get_gene_count, get_clean_mut_gene_list, get_DEL_INS_MOB_aa_start_pos, get_DEL_AA_set, \
-    predict_mutation_effect_on_feature, get_mutated_hypermutator_genes, get_SUB_AA_range, get_DEL_AA_range, \
+    predict_mutation_effect_on_feature, predict_mutation_effect_on_gene, get_mutated_hypermutator_genes, get_SUB_AA_range, get_DEL_AA_range, \
     get_DEL_INS_MOB_nuc_start_pos, get_coding_SNP_rel_nuc_pos, get_genetic_coding_SNP_nuc_chng, \
     get_genetic_noncoding_or_pseudogene_SNP_nuc_chng, get_ins_seq, is_readthrough_codon_SNP
 
@@ -178,6 +178,10 @@ assert (predict_mutation_effect_on_feature(m, f) == "truncation")
 # testing output for "unknown" (intergenic region)
 f = {"feature type": "unknown"}
 assert (predict_mutation_effect_on_feature(None, f) == "other")
+
+# Testing read-through SNPs
+m = {"Mutation Type": "SNP", "Details": "*703S (TAA→TCA)", "coding": True}
+assert (predict_mutation_effect_on_gene(m) == "other")
 
 weirdly_encoded_dash_char_1 = '‑'  # Breseq's weird encoding for the dash character
 weirdly_encoded_dash_char_2 = '‐'  # Another Breseq weirdly encoded dash character
