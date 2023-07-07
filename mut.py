@@ -21,8 +21,7 @@ HYPERMUTATOR_GENES = {
     "nth", "nei", "xthA", "xth", "nfo",
     "ung", "vsr", "ada", "ogt", "recA",
     "zab", "umuB", "tif", "lexB", "recH", "rnmB", "srf",
-    "recG", "radC", "spoV", "ssb", "exrB", "lexC"
-                                                "hns"
+    "recG", "radC", "spoV", "ssb", "exrB", "lexC", "hns"
     # We've had this one mutate in ALE experiments and not cause hypermutation, so don't include unless also checking if ALE is an outlier with mutation counts
 }
 
