@@ -207,6 +207,6 @@ assert (get_DEL_AA_set("coding (4‑11/20 nt)") == {2, 3, 4})  # test for remova
 assert (get_DEL_AA_set("coding (2412‑2420/2547 nt") == {804, 805, 806,
                                                         807})  # 2412 is divisible by 3 == final nuc in an AA.
 
-assert (get_SUB_AA_range('coding (114‐115/1260 nt)') == (114, 115))
+assert(get_SUB_AA_range("coding (114‐115/1260 nt")==(38, 39))
 
 print("DONE")

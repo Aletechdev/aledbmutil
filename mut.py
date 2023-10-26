@@ -230,6 +230,10 @@ def _replace_weirdly_encoded_dash_char(mut_details_str):
     return mut_details_str
 
 
+def get_AA_from_nuc(nuc):
+    return math.ceil(nuc/3)
+
+
 def get_DEL_INS_MOB_aa_start_pos(mut_details_str):
     aa_pos = None
     mut_details_str = _replace_weirdly_encoded_dash_char(mut_details_str)
@@ -240,7 +244,7 @@ def get_DEL_INS_MOB_aa_start_pos(mut_details_str):
             end_char = '-'
         nuc_pos = int(mut_details_str[mut_details_str.find(
             start_char) + 1:mut_details_str.find(end_char)])
-        aa_pos = math.ceil(nuc_pos / 3)
+        aa_pos = get_AA_from_nuc(nuc_pos)
     return aa_pos
 
 
@@ -268,13 +272,13 @@ def get_DEL_AA_range(mut_details_str):
             start_char) + 1: mut_details_str.find(end_char)]
         l = start_stop_str.split('-')
 
-        ints = [int(x) for x in l]
+        nucs = [int(x) for x in l]
         if len(l) > 1:
-            start_aa_pos = math.ceil(ints[0] / 3)
-            stop_aa_pos = math.ceil(ints[1] / 3)
+            start_aa_pos = get_AA_from_nuc(nucs[0])
+            stop_aa_pos = get_AA_from_nuc(nucs[1])
             DEL_AA_range = (start_aa_pos, stop_aa_pos)
         else:
-            aa_pos_set = math.ceil(ints[0] / 3)
+            aa_pos_set = get_AA_from_nuc(nucs[0])
             DEL_AA_range = (aa_pos_set, aa_pos_set)
     return DEL_AA_range
 
@@ -293,9 +297,10 @@ def get_SUB_AA_range(mut_details_str):
         end_char = '/'
         sub_str = mut_details_str[mut_details_str.find(
             start_char) + 1:mut_details_str.find(end_char)]
-        SUB_AA_range = sub_str.split('-')
-        SUB_AA_range[0] = int(SUB_AA_range[0])
-        SUB_AA_range[1] = int(SUB_AA_range[1])
+        SUB_AA_nuc_rng = sub_str.split('-')
+        start_aa_pos = get_AA_from_nuc(int(SUB_AA_nuc_rng[0]))
+        stop_aa_pos = get_AA_from_nuc(int(SUB_AA_nuc_rng[1]))
+        SUB_AA_range = (start_aa_pos, stop_aa_pos)
     return tuple(SUB_AA_range)
 
 
